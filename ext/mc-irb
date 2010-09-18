@@ -1,0 +1,100 @@
+#!/usr/bin/env ruby
+
+# Simple IRB shell for mcollective
+#
+#    mc-irb nrpe
+#    Determining the amount of hosts matching filter for 2 seconds .... 47
+#    >> rpc :runcommand, :command => "check_disks"
+#
+#     * [ ============================================================> ] 47 / 47
+#
+#
+#     dev1.your.net                      Request Aborted
+#        CRITICAL
+#                     Output: DISK CRITICAL - free space: / 176 MB (4% inode=86%);
+#                  Exit Code: 2
+#           Performance Data:  /=3959MB;3706;3924;0;4361 /boot=26MB;83;88;0;98 /dev/shm=0MB;217;230;0;256
+#
+#    => true
+#    >> mchelp
+#    <shows the DDL based help for the chosen agent>
+#    => true
+#    >> rpc(:runcommand, :command => "check_disks") do |resp|
+#    ?> puts resp[:sender] + ":   " + resp[:data][:output]
+#    >> end
+#
+#     * [ ============================================================> ] 47 / 47
+#
+#     dev1.your.net:   DISK OK
+#     <snip>
+#    => true
+#    >>
+#
+# You can access the agent variable via @agent from where you can do the usual manipulation of filters etc
+#
+require 'rubygems'
+require 'irb'
+
+def consolize &block
+  yield
+
+  IRB.setup(nil)
+  irb = IRB::Irb.new
+  IRB.conf[:MAIN_CONTEXT] = irb.context
+  irb.context.evaluate("require 'irb/completion'", 0)
+
+  trap("SIGINT") do
+    irb.signal_handle
+  end
+  catch(:IRB_EXIT) do
+    irb.eval_input
+  end
+end
+
+def mchelp
+    system("mc-rpc --agent-help #{@agent_name}|less")
+    true
+end
+
+def rpc(method_name, *args, &block)
+    unless block_given?
+        if args.size > 0
+            args = args.first
+        else
+            args = {}
+        end
+
+        if args[:verbose]
+            args.delete(:verbose)
+
+            printrpc(@agent.send(method_name, args), :verbose => true)
+        else
+            printrpc @agent.send(method_name, args)
+        end
+    else
+        @agent.send(method_name, args.first).each do |resp|
+            yield resp
+        end
+    end
+
+    true
+end
+
+consolize do
+  require 'mcollective'
+
+  include MCollective::RPC
+
+  options = rpcoptions{|p,o| }
+
+  unless ARGV.size == 1
+      puts "Please specify an agent name on the command line"
+      exit 1
+  end
+
+  @agent_name = ARGV[0]
+
+  @agent = rpcclient(@agent_name, :options => options)
+
+  @agent.discover(:verbose => true)
+end
