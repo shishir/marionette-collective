@@ -2,11 +2,9 @@ module MCollective
     module Facts
         require 'java'
 
-        # A factsource that reads a hash of facts from a YAML file
-        #
-        # Multiple files can be specified seperated with a : in the
-        # config file, they will be merged with later files overriding
-        # earlier ones in the list.
+        # A fact source for mcollective when running
+        # under jruby, sets all system properties as
+        # facts
         class Jvm<Base
             include_class java.lang.System
 
