@@ -64,7 +64,7 @@ module MCollective
             # Receives a message from the Stomp connection
             def receive
                 @log.debug("Waiting for a message from Stomp")
-                msg = @connection.receive
+                msg = @connection.receive(0)
 
                 Request.new(msg.getBody)
             end
