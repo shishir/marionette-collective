@@ -24,7 +24,7 @@ module MCollective
                     options = Marshal.load(@@initial_options)
 
                 else
-                    oparser = MCollective::Optionparser.new({:verbose => false, :progress_bar => true}, "filter")
+                    oparser = MCollective::Optionparser.new({:verbose => false, :progress_bar => true, :mcollective_single_target => false}, "filter")
 
                     options = oparser.parse do |parser, options|
                         if block_given?
@@ -46,6 +46,7 @@ module MCollective
                 @config = options[:config]
                 @discovered_agents = nil
                 @progress = options[:progress_bar]
+                @single_target = options[:mcollective_single_target]
 
                 agent_filter agent
 
@@ -171,13 +172,17 @@ module MCollective
 
                 @ddl.validate_request(action, args) if @ddl
 
-                # Normal agent requests as per client.action(args)
-                if block_given?
-                    call_agent(action, args, options) do |r|
-                        block.call(r)
-                    end
+                # Handle single target requests by doing discovery and picking
+                # a random node.  Then do a custom request specifying a filter
+                # that will only match the one node.
+                if @single_target
+                    target_node = pick_nodes_from_discovered(@single_target)
+                    Log.instance.debug("Picked #{target_node} as single target")
+
+                    custom_request(action, args, [target_node], {"identity" => target_node}, &block)
                 else
-                    call_agent(action, args, options)
+                    # Normal agent requests as per client.action(args)
+                    call_agent(action, args, options, &block)
                 end
             end
 
@@ -324,6 +329,21 @@ module MCollective
             end
 
             private
+            # Pick a number of nodes from the discovered nodes
+            def pick_nodes_from_discovered(count)
+                return discover if discover.size <= count
+
+                result = []
+
+                count.times do
+                    rnd = rand(discover.size)
+                    result << discover[rnd]
+                    discover.delete_at(rnd)
+                end
+
+                result
+            end
+
             # for requests that do not care for results just
             # return the request id and don't do any of the
             # response processing.

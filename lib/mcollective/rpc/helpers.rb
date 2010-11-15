@@ -211,6 +211,10 @@ module MCollective
                 parser.on('--np', '--no-progress', 'Do not show the progress bar') do |v|
                     options[:progress_bar] = false
                 end
+
+                parser.on('--one', '-1', 'Send request to only one discovered target') do |v|
+                    options[:mcollective_single_target] = 1
+                end
             end
         end
     end
