@@ -4,7 +4,7 @@ module MCollective
         # and just brings in a lot of convention and standard approached.
         class Client
             attr_accessor :discovery_timeout, :timeout, :verbose, :filter, :config, :progress
-            attr_reader :client, :stats, :ddl, :agent
+            attr_reader :client, :stats, :ddl, :agent, :limit_targets
 
             @@initial_options = nil
 
@@ -328,6 +328,21 @@ module MCollective
                  :config => @config}
             end
 
+            # Sets and sanity checks the limit_targets variable
+            # used to restrict how many nodes we'll target
+            def limit_targets=(limit)
+                if limit.is_a?(String)
+                    raise "Invalid limit specified: #{limit} valid limits are /^\d+%*$/" unless limit =~ /^\d+%*$/
+                    @limit_targets = limit
+                elsif limit.respond_to?(:to_i)
+                    limit = limit.to_i
+                    limit = 1 if limit == 0
+                    @limit_targets = limit
+                else
+                    raise "Don't know how to handle limit of type #{limit.class}"
+                end
+            end
+
             private
             # Pick a number of nodes from the discovered nodes
             #
@@ -342,8 +357,6 @@ module MCollective
             #     selection
             #   - anything else will just pick one at random
             def pick_nodes_from_discovered(count)
-                raise "count should be a string" unless count.is_a?(String)
-
                 if count =~ /%$/
                     pct = (discover.size * (count.to_f / 100)).to_i
                     pct == 0 ? count = 1 : count = pct
