@@ -24,7 +24,7 @@ module MCollective
                     options = Marshal.load(@@initial_options)
 
                 else
-                    oparser = MCollective::Optionparser.new({:verbose => false, :progress_bar => true, :mcollective_single_target => false}, "filter")
+                    oparser = MCollective::Optionparser.new({:verbose => false, :progress_bar => true, :mcollective_limit_targets => false}, "filter")
 
                     options = oparser.parse do |parser, options|
                         if block_given?
@@ -46,7 +46,7 @@ module MCollective
                 @config = options[:config]
                 @discovered_agents = nil
                 @progress = options[:progress_bar]
-                @single_target = options[:mcollective_single_target]
+                @limit_targets = options[:mcollective_limit_targets]
 
                 agent_filter agent
 
@@ -175,11 +175,11 @@ module MCollective
                 # Handle single target requests by doing discovery and picking
                 # a random node.  Then do a custom request specifying a filter
                 # that will only match the one node.
-                if @single_target
-                    target_node = pick_nodes_from_discovered(@single_target)
-                    Log.instance.debug("Picked #{target_node} as single target")
+                if @limit_targets
+                    target_nodes = pick_nodes_from_discovered(@limit_targets)
+                    Log.instance.debug("Picked #{target_nodes.join(',')} as limited target(s)")
 
-                    custom_request(action, args, [target_node], {"identity" => target_node}, &block)
+                    custom_request(action, args, target_nodes, {"identity" => /^(#{target_nodes.join('|')})$/}, &block)
                 else
                     # Normal agent requests as per client.action(args)
                     call_agent(action, args, options, &block)
@@ -330,18 +330,42 @@ module MCollective
 
             private
             # Pick a number of nodes from the discovered nodes
+            #
+            # The count should be a string that can be either
+            # just a number or a percentage like 10%
+            #
+            # It will select nodes from the discovered list based
+            # on the rpclimitmethod configuration option which can
+            # be either :first or anything else
+            #
+            #   - :first would be a simple way to do a distance based
+            #     selection
+            #   - anything else will just pick one at random
             def pick_nodes_from_discovered(count)
+                raise "count should be a string" unless count.is_a?(String)
+
+                if count =~ /%$/
+                    pct = (discover.size * (count.to_f / 100)).to_i
+                    pct == 0 ? count = 1 : count = pct
+                else
+                    count = count.to_i
+                end
+
                 return discover if discover.size <= count
 
                 result = []
 
-                count.times do
-                    rnd = rand(discover.size)
-                    result << discover[rnd]
-                    discover.delete_at(rnd)
+                if Config.instance.rpclimitmethod == :first
+                    return discover[0, count]
+                else
+                    count.times do
+                        rnd = rand(discover.size)
+                        result << discover[rnd]
+                        discover.delete_at(rnd)
+                    end
                 end
 
-                result
+                [result].flatten
             end
 
             # for requests that do not care for results just
