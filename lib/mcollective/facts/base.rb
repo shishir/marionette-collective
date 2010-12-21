@@ -26,7 +26,7 @@ module MCollective
                 Thread.exclusive do
                     begin
                         if (Time.now.to_i - @@last_facts_load > cache_time.to_i )
-                            logger.debug("Resetting facter cache after #{cache_time} seconds")
+                            logger.debug("Resetting facter cache after #{cache_time} seconds, now: #{Time.now.to_i} last-known-good: #{@@last_facts_load}")
 
                             @@facts = get_facts
 
@@ -34,6 +34,9 @@ module MCollective
                             raise "Got empty facts" if @@facts.empty?
 
                             @@last_good_facts = @@facts.clone
+                            @@last_facts_load = Time.now.to_i
+                        else
+                            logger.debug("Using cached facts now: #{Time.now.to_i} last-known-good: #{@@last_facts_load}")
                         end
                     rescue Exception => e
                         logger.error("Failed to load facts: #{e.class}: #{e}")
