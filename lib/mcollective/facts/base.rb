@@ -21,7 +21,7 @@ module MCollective
                 config = Config.instance
                 logger = Log.instance
 
-                cache_time = config.pluginconf["facter.cache_time"] || 300
+                cache_time = config.fact_cache_time || 300
 
                 Thread.exclusive do
                     begin

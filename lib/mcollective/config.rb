@@ -8,7 +8,7 @@ module MCollective
                     :securityprovider, :factsource, :registration, :registerinterval, :topicsep,
                     :classesfile, :rpcauditprovider, :rpcaudit, :configdir, :rpcauthprovider,
                     :rpcauthorization, :color, :configfile, :rpchelptemplate, :rpclimitmethod,
-                    :logger_type
+                    :logger_type, :fact_cache_time
 
         def initialize
             @configured = false
@@ -39,6 +39,7 @@ module MCollective
             @max_log_size = 2097152
             @rpclimitmethod = :first
             @libdir = Array.new
+            @fact_cache_time = 300
 
             if File.exists?(configfile)
                 File.open(configfile, "r").each do |line|
@@ -106,6 +107,8 @@ module MCollective
                                     @rpclimitmethod = val.to_sym
                                 when "logger_type"
                                     @logger_type = val
+                                when "fact_cache_time"
+                                    @fact_cache_time = val.to_i
 
                                 else
                                     raise("Unknown config parameter #{key}")
