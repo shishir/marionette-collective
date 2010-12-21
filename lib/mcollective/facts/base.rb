@@ -17,7 +17,7 @@ module MCollective
             end
 
             # Returns the value of a single fact
-            def get_fact(fact)
+            def get_fact(fact=nil)
                 config = Config.instance
                 logger = Log.instance
 
@@ -28,10 +28,14 @@ module MCollective
                         if (Time.now.to_i - @@last_facts_load > cache_time.to_i )
                             logger.debug("Resetting facter cache after #{cache_time} seconds, now: #{Time.now.to_i} last-known-good: #{@@last_facts_load}")
 
-                            @@facts = get_facts
+                            @@facts = load_facts_from_source
 
                             # Force reset to last known good state on empty facts
                             raise "Got empty facts" if @@facts.empty?
+
+                            @@facts.each_pair do |key,value|
+                                @@facts[key.to_s] = value.to_s
+                            end
 
                             @@last_good_facts = @@facts.clone
                             @@last_facts_load = Time.now.to_i
@@ -52,7 +56,17 @@ module MCollective
                 end
 
 
-                @@facts.include?(fact) ? @@facts[fact] : nil
+                # If you do not supply a specific fact all facts will be returned
+                if fact.nil?
+                    return @@facts
+                else
+                    @@facts.include?(fact) ? @@facts[fact] : nil
+                end
+            end
+
+            # Returns all facts
+            def get_facts
+                get_fact(nil)
             end
 
             # Returns true if we know about a specific fact, false otherwise

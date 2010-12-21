@@ -116,7 +116,7 @@ module MCollective
 
                 @configured = true
 
-                PluginManager.loadclass("Mcollective::Facts::#{@factsource}")
+                PluginManager.loadclass("Mcollective::Facts::#{@factsource}_facts")
                 PluginManager.loadclass("Mcollective::Connector::#{@connector}")
                 PluginManager.loadclass("Mcollective::Security::#{@securityprovider}")
                 PluginManager.loadclass("Mcollective::Registration::#{@registration}")
