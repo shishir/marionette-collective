@@ -11,6 +11,7 @@ title: Changelog
 
 |Date|Description|Ticket|
 |----|-----------|------|
+|2010/12/29|Treat machines that fail security validation like ones that did not respond|5700|
 |2010/12/28|Remove trailing whitespace from all source files|5702|
 |2010/12/28|Adjust the logfile audit format to include local time and all on one line|5694|
 |2010/12/26|Improve the SimpleRPC fact_filter helper to support new fact operators|5678|

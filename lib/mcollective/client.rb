@@ -74,9 +74,6 @@ module MCollective
             rescue MsgDoesNotMatchRequestID => e
                 @log.debug("Ignoring a message for some other client")
                 retry
-            rescue Exception => e
-                @log.warn("Could not receive message from middleware: #{e.class}: #{e}")
-                retry
             end
 
             msg
