@@ -42,13 +42,6 @@ module MCollective
             end
 
             # Encodes a request msg
-            #
-            # TODO: registration is initiated by the servers who dont have
-            #       the usual layout, we would need to put all servers
-            #       public keys at the location where registration messages
-            #       get consumed for this to work.  So think about that later
-            #       for now registration just isnt supported
-            #
             def encoderequest(sender, target, msg, requestid, filter={})
                 crypted = encrypt(serialize(msg), callerid)
 
