@@ -37,32 +37,16 @@ module MCollective
                     body[:body] = deserialize(decrypt(cryptdata, nil))
                 else
                     body[:body] = deserialize(decrypt(cryptdata, body[:callerid]))
-
-                    @requestors ||= {}
-
-                    # record who requested a message
-                    Thread.exclusive { @requestors[body[:requestid]] = body[:callerid] }
-
-                    @log.debug("Currently keeping track of #{@requestors.size} messages")
                 end
 
                 return body
             end
 
             # Encodes a reply
-            def encodereply(sender, target, msg, requestid, filter={})
-                unless @requestors.include?(requestid)
-                    @log.error("Could not reply, we do not know who made request #{requestid}")
-                    raise "Could not encode reply, unknown requestor for request #{requestid}"
-                end
+            def encodereply(sender, target, msg, requestid, requestcallerid)
+                crypted = encrypt(serialize(msg), requestcallerid)
 
-
-                requestorcert = @requestors[requestid]
-                Thread.exclusive { @requestors.delete(requestid) }
-
-                crypted = encrypt(serialize(msg), requestorcert)
-
-                @log.debug("Encoded a reply for request #{requestid}")
+                @log.debug("Encoded a reply for request #{requestid} for #{requestcallerid}")
 
                 req = {:senderid => @config.identity,
                        :requestid => requestid,
