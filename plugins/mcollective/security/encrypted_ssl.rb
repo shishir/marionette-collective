@@ -165,7 +165,7 @@ module MCollective
                     # servers need to set callerid as well, not usually needed but
                     # would be if you're doing registration or auditing or generating
                     # requests for some or other reason
-                    "cert=#{File.basename(server_public_key).gsub(/\.pem$/, '')}"
+                    return "cert=#{File.basename(server_public_key).gsub(/\.pem$/, '')}"
                 end
             end
 
