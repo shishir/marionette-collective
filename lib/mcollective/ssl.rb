@@ -56,7 +56,7 @@ module MCollective
         # the key and IV
         #
         # Return a hash with everything base 64 encoded
-        def crypt_with_private(plain_text)
+        def encrypt_with_private(plain_text)
             crypted = aes_encrypt(plain_text)
 
             encoded_key = base64_encode(rsa_encrypt_with_private(crypted[:key]))
