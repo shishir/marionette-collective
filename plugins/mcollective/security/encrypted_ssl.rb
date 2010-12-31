@@ -1,8 +1,30 @@
 module MCollective
     module Security
+        # TODO:
+        #    - machines receiving registration or no reply messages will keep track of IDs in @requestors
+        #      but will never remove them from the hash need to do housekeeping on the hash somehow
         class Encrypted_ssl<Base
             def decodemsg(msg)
                 body = deserialize(msg.payload)
+
+                # if we get a message that has a pubkey attached and we're set to learn
+                # then add it to the client_cert_dir this should only happen on servers
+                # since clients will get replies using their own pubkeys
+                if @config.pluginconf["ssl_learn_pubkeys"]
+                    if body.include?(:sslpubkey)
+                        if client_cert_dir
+                            certname = certname_from_callerid(body[:callerid])
+                            if certname
+                                certfile = "#{client_cert_dir}/#{certname}.pem"
+                                unless File.exist?(certfile)
+                                    @log.debug("Caching client cert in #{certfile}")
+                                    File.open(certfile, "w") {|f| f.print body[:sslpubkey]}
+                                end
+                            end
+                        end
+                    end
+                end
+
                 cryptdata = {:key => body[:sslkey], :data => body[:body]}
 
                 if @initiated_by == :client
@@ -14,6 +36,8 @@ module MCollective
 
                     # record who requested a message
                     Thread.exclusive { @requestors[body[:requestid]] = body[:callerid] }
+
+                    @log.debug("Currently keeping track of #{@requestors.size} messages")
                 end
 
                 return body
@@ -23,22 +47,26 @@ module MCollective
             def encodereply(sender, target, msg, requestid, filter={})
                 unless @requestors.include?(requestid)
                     @log.error("Could not reply, we do not know who made request #{requestid}")
-                    raise "Could not encode reply, unknown requestor for request #{request}"
+                    raise "Could not encode reply, unknown requestor for request #{requestid}"
                 end
 
-                crypted = encrypt(serialize(msg), @requestors[requestid])
 
-                Thread.exclusive { @requestors.delete(requestid) }
+                requestorcert = @requestors[requestid]
+                Thread.exclusive { @requestors.delete(requestorcert) }
 
-                @log.debug("Encoded a message for request #{requestid}")
+                crypted = encrypt(serialize(msg), requestorcert)
 
-                serialize({:senderid => @config.identity,
-                           :requestid => requestid,
-                           :senderagent => sender,
-                           :msgtarget => target,
-                           :msgtime => Time.now.to_i,
-                           :sslkey => crypted[:key],
-                           :body => crypted[:data]})
+                @log.debug("Encoded a reply for request #{requestid}")
+
+                req = {:senderid => @config.identity,
+                       :requestid => requestid,
+                       :senderagent => sender,
+                       :msgtarget => target,
+                       :msgtime => Time.now.to_i,
+                       :sslkey => crypted[:key],
+                       :body => crypted[:data]}
+
+                serialize(req)
             end
 
             # Encodes a request msg
@@ -47,15 +75,25 @@ module MCollective
 
                 @log.debug("Encoding a request for '#{target}' with request id #{requestid}")
 
-                serialize({:senderid => @config.identity,
-                           :requestid => requestid,
-                           :msgtarget => target,
-                           :msgtime => Time.now.to_i,
-                           :body => crypted,
-                           :filter => filter,
-                           :callerid => callerid,
-                           :sslkey => crypted[:key],
-                           :body => crypted[:data]})
+                req = {:senderid => @config.identity,
+                       :requestid => requestid,
+                       :msgtarget => target,
+                       :msgtime => Time.now.to_i,
+                       :body => crypted,
+                       :filter => filter,
+                       :callerid => callerid,
+                       :sslkey => crypted[:key],
+                       :body => crypted[:data]}
+
+                if @config.pluginconf["ssl_send_pubkey"]
+                    if @initiated_by == :client
+                        req[:sslpubkey] = File.read(client_public_key)
+                    else
+                        req[:sslpubkey] = File.read(server_public_key)
+                    end
+                end
+
+                serialize(req)
             end
 
             # Serializes a message using the configured encoder
@@ -182,6 +220,15 @@ module MCollective
             def client_cert_dir
                 raise("No plugin.ssl_client_cert_dir configuration option specified") unless @config.pluginconf.include?("ssl_client_cert_dir")
                 @config.pluginconf["ssl_client_cert_dir"]
+            end
+
+            # Takes our cert=foo callerids and return the foo bit else nil
+            def certname_from_callerid(id)
+                if id =~ /^cert=(.+)/
+                    return $1
+                else
+                    return nil
+                end
             end
         end
     end
