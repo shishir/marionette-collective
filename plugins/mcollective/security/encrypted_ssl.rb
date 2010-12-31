@@ -58,7 +58,7 @@ module MCollective
 
 
                 requestorcert = @requestors[requestid]
-                Thread.exclusive { @requestors.delete(requestorcert) }
+                Thread.exclusive { @requestors.delete(requestid) }
 
                 crypted = encrypt(serialize(msg), requestorcert)
 
