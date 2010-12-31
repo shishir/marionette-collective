@@ -3,6 +3,12 @@ module MCollective
         # TODO:
         #    - machines receiving registration or no reply messages will keep track of IDs in @requestors
         #      but will never remove them from the hash need to do housekeeping on the hash somehow
+        #    - investigate sending the public key with every request/reply this will probably require
+        #      the addition of a CA to validate that certs we're receiving is trusted.  Really dont
+        #      think this is a problem as you shouldnt just let random hosts connect to your middleware
+        #      so we really should be able to trust that people cant just inject anything into the thing
+        #      just like with TCP you need firewwalls so too do you need to use the middleware security
+        #      mechanisms to restrict access to your machines
         class Encrypted_ssl<Base
             def decodemsg(msg)
                 body = deserialize(msg.payload)
@@ -10,7 +16,7 @@ module MCollective
                 # if we get a message that has a pubkey attached and we're set to learn
                 # then add it to the client_cert_dir this should only happen on servers
                 # since clients will get replies using their own pubkeys
-                if @config.pluginconf["ssl_learn_pubkeys"]
+                if @config.pluginconf["ssl.learn_pubkeys"]
                     if body.include?(:sslpubkey)
                         if client_cert_dir
                             certname = certname_from_callerid(body[:callerid])
@@ -85,7 +91,7 @@ module MCollective
                        :sslkey => crypted[:key],
                        :body => crypted[:data]}
 
-                if @config.pluginconf["ssl_send_pubkey"]
+                if @config.pluginconf["ssl.send_pubkey"]
                     if @initiated_by == :client
                         req[:sslpubkey] = File.read(client_public_key)
                     else
@@ -98,7 +104,7 @@ module MCollective
 
             # Serializes a message using the configured encoder
             def serialize(msg)
-                serializer = @config.pluginconf["ssl_serializer"] || "marshal"
+                serializer = @config.pluginconf["ssl.serializer"] || "marshal"
 
                 @log.debug("Serializing using #{serializer}")
 
@@ -112,7 +118,7 @@ module MCollective
 
             # De-Serializes a message using the configured encoder
             def deserialize(msg)
-                serializer = @config.pluginconf["ssl_serializer"] || "marshal"
+                serializer = @config.pluginconf["ssl.serializer"] || "marshal"
 
                 @log.debug("De-Serializing using #{serializer}")
 
@@ -173,7 +179,7 @@ module MCollective
                 end
             end
 
-            # On servers this will look in the ssl_client_cert_dir for public
+            # On servers this will look in the ssl.client_cert_dir for public
             # keys matching the clientid, clientid is expected to be in the format
             # set by callerid
             def public_key_path_for_client(clientid)
@@ -185,41 +191,41 @@ module MCollective
             end
 
             # Figures out the client private key either from MCOLLECTIVE_SSL_PRIVATE or the
-            # plugin.ssl_client_private config option
+            # plugin.ssl.client_private config option
             def client_private_key
                 return ENV["MCOLLECTIVE_SSL_PRIVATE"] if ENV.include?("MCOLLECTIVE_SSL_PRIVATE")
 
-                raise("No plugin.ssl_client_private configuration option specified") unless @config.pluginconf.include?("ssl_client_private")
+                raise("No plugin.ssl.client_private configuration option specified") unless @config.pluginconf.include?("ssl.client_private")
 
-                return @config.pluginconf["ssl_client_private"]
+                return @config.pluginconf["ssl.client_private"]
             end
 
             # Figures out the client public key either from MCOLLECTIVE_SSL_PUBLIC or the
-            # plugin.ssl_client_public config option
+            # plugin.ssl.client_public config option
             def client_public_key
                 return ENV["MCOLLECTIVE_SSL_PUBLIC"] if ENV.include?("MCOLLECTIVE_SSL_PUBLIC")
 
-                raise("No plugin.ssl_client_public configuration option specified") unless @config.pluginconf.include?("ssl_client_public")
+                raise("No plugin.ssl.client_public configuration option specified") unless @config.pluginconf.include?("ssl.client_public")
 
-                return @config.pluginconf["ssl_client_public"]
+                return @config.pluginconf["ssl.client_public"]
             end
 
-            # Figures out the server public key from the plugin.ssl_server_public config option
+            # Figures out the server public key from the plugin.ssl.server_public config option
             def server_public_key
-                raise("No ssl_server_public configuration option specified") unless @config.pluginconf.include?("ssl_server_public")
-                return @config.pluginconf["ssl_server_public"]
+                raise("No ssl.server_public configuration option specified") unless @config.pluginconf.include?("ssl.server_public")
+                return @config.pluginconf["ssl.server_public"]
             end
 
-            # Figures out the server private key from the plugin.ssl_server_private config option
+            # Figures out the server private key from the plugin.ssl.server_private config option
             def server_private_key
-                raise("No plugin.ssl_server_private configuration option specified") unless @config.pluginconf.include?("ssl_server_private")
-                @config.pluginconf["ssl_server_private"]
+                raise("No plugin.ssl.server_private configuration option specified") unless @config.pluginconf.include?("ssl.server_private")
+                @config.pluginconf["ssl.server_private"]
             end
 
-            # Figures out where to get client public certs from the plugin.ssl_client_cert_dir config option
+            # Figures out where to get client public certs from the plugin.ssl.client_cert_dir config option
             def client_cert_dir
-                raise("No plugin.ssl_client_cert_dir configuration option specified") unless @config.pluginconf.include?("ssl_client_cert_dir")
-                @config.pluginconf["ssl_client_cert_dir"]
+                raise("No plugin.ssl.client_cert_dir configuration option specified") unless @config.pluginconf.include?("ssl.client_cert_dir")
+                @config.pluginconf["ssl.client_cert_dir"]
             end
 
             # Takes our cert=foo callerids and return the foo bit else nil
