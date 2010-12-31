@@ -5,8 +5,8 @@ module MCollective
     # A class that assists in encrypting and decrypting data using a
     # combination of RSA and AES
     #
-    # Data will be AES encrypted for speed, the Key and IV used in
-    # the AES stage will be encrypted using RSA
+    # Data will be AES encrypted for speed, the Key used in # the AES
+    # stage will be encrypted using RSA
     #
     #   ssl = SSL.new(public_key, private_key, passphrase)
     #
