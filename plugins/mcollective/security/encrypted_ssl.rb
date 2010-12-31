@@ -3,7 +3,7 @@ module MCollective
         class Encrypted_ssl<Base
             def decodemsg(msg)
                 body = deserialize(msg.payload)
-                cryptdata = {:key => body[:sslkey], :iv => body[:ssliv], :data => body[:body]}
+                cryptdata = {:key => body[:sslkey], :data => body[:body]}
 
                 if @initiated_by == :client
                     body[:body] = deserialize(decrypt(cryptdata, nil))
@@ -38,7 +38,6 @@ module MCollective
                            :msgtarget => target,
                            :msgtime => Time.now.to_i,
                            :sslkey => crypted[:key],
-                           :ssliv => crypted[:iv],
                            :body => crypted[:data]})
             end
 
@@ -68,7 +67,6 @@ module MCollective
                        :filter => filter,
                        :callerid => callerid,
                        :sslkey => crypted[:key],
-                       :ssliv => crypted[:iv],
                        :body => crypted[:data]}
 
                 req[:callerid] = callerid if  @initiated_by == :client
@@ -118,12 +116,12 @@ module MCollective
                     @ssl ||= SSL.new(client_public_key, client_private_key)
 
                     @log.debug("Encrypting message using private key")
-                    return @ssl.crypt_with_private(string)
+                    return @ssl.encrypt_with_private(string)
                 else
                     @log.debug("Encrypting message using public key for #{certid}")
 
                     ssl = SSL.new(public_key_path_for_client(certid))
-                    return ssl.crypt_with_public(string)
+                    return ssl.encrypt_with_public(string)
                 end
             end
 
