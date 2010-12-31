@@ -50,28 +50,19 @@ module MCollective
             #       for now registration just isnt supported
             #
             def encoderequest(sender, target, msg, requestid, filter={})
-                if @initiated_by == :client
-                    crypted = encrypt(serialize(msg), callerid)
-                else
-                    raise "Servers making requests is not yet supported in this version of the security plugin"
-                end
-
+                crypted = encrypt(serialize(msg), callerid)
 
                 @log.debug("Encoding a request for '#{target}' with request id #{requestid}")
 
-                req = {:senderid => @config.identity,
-                       :requestid => requestid,
-                       :msgtarget => target,
-                       :msgtime => Time.now.to_i,
-                       :body => crypted,
-                       :filter => filter,
-                       :callerid => callerid,
-                       :sslkey => crypted[:key],
-                       :body => crypted[:data]}
-
-                req[:callerid] = callerid if  @initiated_by == :client
-
-                serialize(req)
+                serialize({:senderid => @config.identity,
+                           :requestid => requestid,
+                           :msgtarget => target,
+                           :msgtime => Time.now.to_i,
+                           :body => crypted,
+                           :filter => filter,
+                           :callerid => callerid,
+                           :sslkey => crypted[:key],
+                           :body => crypted[:data]})
             end
 
             # Serializes a message using the configured encoder
@@ -107,7 +98,10 @@ module MCollective
                 if @initiated_by == :client
                     return "cert=#{File.basename(client_public_key).gsub(/\.pem$/, '')}"
                 else
-                    return ""
+                    # servers need to set callerid as well, not usually needed but
+                    # would be if you're doing registration or auditing or generating
+                    # requests for some or other reason
+                    "cert=#{File.basename(server_public_key).gsub(/\.pem$/, '')}"
                 end
             end
 
@@ -118,10 +112,19 @@ module MCollective
                     @log.debug("Encrypting message using private key")
                     return @ssl.encrypt_with_private(string)
                 else
-                    @log.debug("Encrypting message using public key for #{certid}")
+                    # when the server is initating requests like for registration
+                    # then the certid will be our callerid
+                    if certid == callerid
+                        @log.debug("Encrypting message using private key #{server_private_key}")
 
-                    ssl = SSL.new(public_key_path_for_client(certid))
-                    return ssl.encrypt_with_public(string)
+                        ssl = SSL.new(server_public_key, server_private_key)
+                        return ssl.encrypt_with_private(string)
+                    else
+                        @log.debug("Encrypting message using public key for #{certid}")
+
+                        ssl = SSL.new(public_key_path_for_client(certid))
+                        return ssl.encrypt_with_public(string)
+                    end
                 end
             end
 
@@ -168,6 +171,18 @@ module MCollective
                 raise("No plugin.ssl_client_public configuration option specified") unless @config.pluginconf.include?("ssl_client_public")
 
                 return @config.pluginconf["ssl_client_public"]
+            end
+
+            # Figures out the server public key from the plugin.ssl_server_public config option
+            def server_public_key
+                raise("No ssl_server_public configuration option specified") unless @config.pluginconf.include?("ssl_server_public")
+                return @config.pluginconf["ssl_server_public"]
+            end
+
+            # Figures out the server private key from the plugin.ssl_server_private config option
+            def server_private_key
+                raise("No plugin.ssl_server_private configuration option specified") unless @config.pluginconf.include?("ssl_server_private")
+                @config.pluginconf["ssl_server_private"]
             end
 
             # Figures out where to get client public certs from the plugin.ssl_client_cert_dir config option

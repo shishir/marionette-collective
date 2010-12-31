@@ -39,7 +39,7 @@ module MCollective
         end
 
         it "using a helper it should be able to decrypt with public key what it encrypted using the private key" do
-            @ssl.decrypt_with_public(@ssl.crypt_with_private("foo")).should == "foo"
+            @ssl.decrypt_with_public(@ssl.encrypt_with_private("foo")).should == "foo"
         end
 
         describe "#read_key" do
