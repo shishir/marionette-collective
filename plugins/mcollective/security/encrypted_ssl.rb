@@ -1,14 +1,57 @@
 module MCollective
     module Security
-        # TODO:
-        #    - machines receiving registration or no reply messages will keep track of IDs in @requestors
-        #      but will never remove them from the hash need to do housekeeping on the hash somehow
-        #    - investigate sending the public key with every request/reply this will probably require
-        #      the addition of a CA to validate that certs we're receiving is trusted.  Really dont
-        #      think this is a problem as you shouldnt just let random hosts connect to your middleware
-        #      so we really should be able to trust that people cant just inject anything into the thing
-        #      just like with TCP you need firewwalls so too do you need to use the middleware security
-        #      mechanisms to restrict access to your machines
+        # Impliments a security system that encrypts payloads using AES and secures
+        # the AES encrypted data using RSA public/private key encryption.
+        #
+        # The design goals of this plugin are:
+        #
+        # - Each actor - clients and servers - can have their own set of public and
+        #   private keys
+        # - All actors are uniquely and cryptographically identified
+        # - Requests are encrypted using the clients private key and anyone that has
+        #   the public key can see the request.  Thus an atacker may see the requests
+        #   given access to network or machine due to the broadcast nature of mcollective
+        # - Replies are encrypted using the calling clients public key.  Thus no-one but
+        #   the caller can view the contents of replies.
+        # - Servers can all have their own SSL keys, or share one, or reuse keys created
+        #   by other PKI using software like Puppet
+        # - Requests from servers - like registration data - can be secured even to external
+        #   eaves droppers depending on the level of configuration you are prepared to do
+        # - Given a network where you can ensure third parties are not able to access the
+        #   middleware public key distribution can happen automatically
+        #
+        # Configuration Options:
+        # ======================
+        #
+        # Common Options:
+        #
+        #    # Enable this plugin
+        #    securityprovider = encrypted_ssl
+        #
+        #    # Use YAML as serializer
+        #    plugin.ssl.serializer = yaml
+        #
+        #    # Send our public key with every request so servers can learn it
+        #    plugin.ssl.send_pubkey = 1
+        #
+        #    # Cache public keys promiscuously from the network
+        #    plugin.ssl.learn_pubkeys = 1
+        #
+        # Clients:
+        #
+        #    # The clients public and private keys
+        #    plugin.ssl.client_private = /home/user/.mcollective.d/user-private.pem
+        #    plugin.ssl.client_public = /home/user/.mcollective.d/user.pem
+        #
+        # Servers:
+        #
+        #    # Where to cache client keys
+        #    plugin.ssl.client_cert_dir = /etc/mcollective/ssl/clients
+        #
+        #    # The servers public and private keys
+        #    plugin.ssl.server_private = /etc/mcollective/ssl/server-private.pem
+        #    plugin.ssl.server_public = /etc/mcollective/ssl/server-public.pem
+        #
         class Encrypted_ssl<Base
             def decodemsg(msg)
                 body = deserialize(msg.payload)
