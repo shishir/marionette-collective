@@ -59,7 +59,7 @@ module MCollective
                 # if we get a message that has a pubkey attached and we're set to learn
                 # then add it to the client_cert_dir this should only happen on servers
                 # since clients will get replies using their own pubkeys
-                if @config.pluginconf.include?("ssl.learn_pubkeys") && @config.pluginconf["ssl.learn_pubkeys"] == 1
+                if @config.pluginconf.include?("aes.learn_pubkeys") && @config.pluginconf["aes.learn_pubkeys"] == 1
                     if body.include?(:sslpubkey)
                         if client_cert_dir
                             certname = certname_from_callerid(body[:callerid])
@@ -121,7 +121,7 @@ module MCollective
                        :sslkey => crypted[:key],
                        :body => crypted[:data]}
 
-                if @config.pluginconf.include?("ssl.send_pubkey") && @config.pluginconf["ssl.send_pubkey"] == 1
+                if @config.pluginconf.include?("aes.send_pubkey") && @config.pluginconf["aes.send_pubkey"] == 1
                     if @initiated_by == :client
                         req[:sslpubkey] = File.read(client_public_key)
                     else
@@ -134,7 +134,7 @@ module MCollective
 
             # Serializes a message using the configured encoder
             def serialize(msg)
-                serializer = @config.pluginconf["ssl.serializer"] || "marshal"
+                serializer = @config.pluginconf["aes.serializer"] || "marshal"
 
                 @log.debug("Serializing using #{serializer}")
 
@@ -148,7 +148,7 @@ module MCollective
 
             # De-Serializes a message using the configured encoder
             def deserialize(msg)
-                serializer = @config.pluginconf["ssl.serializer"] || "marshal"
+                serializer = @config.pluginconf["aes.serializer"] || "marshal"
 
                 @log.debug("De-Serializing using #{serializer}")
 
@@ -209,7 +209,7 @@ module MCollective
                 end
             end
 
-            # On servers this will look in the ssl.client_cert_dir for public
+            # On servers this will look in the aes.client_cert_dir for public
             # keys matching the clientid, clientid is expected to be in the format
             # set by callerid
             def public_key_path_for_client(clientid)
@@ -225,9 +225,9 @@ module MCollective
             def client_private_key
                 return ENV["MCOLLECTIVE_AES_PRIVATE"] if ENV.include?("MCOLLECTIVE_AES_PRIVATE")
 
-                raise("No plugin.aes.client_private configuration option specified") unless @config.pluginconf.include?("ssl.client_private")
+                raise("No plugin.aes.client_private configuration option specified") unless @config.pluginconf.include?("aes.client_private")
 
-                return @config.pluginconf["ssl.client_private"]
+                return @config.pluginconf["aes.client_private"]
             end
 
             # Figures out the client public key either from MCOLLECTIVE_AES_PUBLIC or the
@@ -235,27 +235,27 @@ module MCollective
             def client_public_key
                 return ENV["MCOLLECTIVE_ARS_PUBLIC"] if ENV.include?("MCOLLECTIVE_AES_PUBLIC")
 
-                raise("No plugin.aes.client_public configuration option specified") unless @config.pluginconf.include?("ssl.client_public")
+                raise("No plugin.aes.client_public configuration option specified") unless @config.pluginconf.include?("aes.client_public")
 
-                return @config.pluginconf["ssl.client_public"]
+                return @config.pluginconf["aes.client_public"]
             end
 
             # Figures out the server public key from the plugin.aes.server_public config option
             def server_public_key
-                raise("No ssl.server_public configuration option specified") unless @config.pluginconf.include?("ssl.server_public")
-                return @config.pluginconf["ssl.server_public"]
+                raise("No aes.server_public configuration option specified") unless @config.pluginconf.include?("aes.server_public")
+                return @config.pluginconf["aes.server_public"]
             end
 
             # Figures out the server private key from the plugin.aes.server_private config option
             def server_private_key
-                raise("No plugin.aes.server_private configuration option specified") unless @config.pluginconf.include?("ssl.server_private")
-                @config.pluginconf["ssl.server_private"]
+                raise("No plugin.aes.server_private configuration option specified") unless @config.pluginconf.include?("aes.server_private")
+                @config.pluginconf["aes.server_private"]
             end
 
             # Figures out where to get client public certs from the plugin.aes.client_cert_dir config option
             def client_cert_dir
-                raise("No plugin.aes.client_cert_dir configuration option specified") unless @config.pluginconf.include?("ssl.client_cert_dir")
-                @config.pluginconf["ssl.client_cert_dir"]
+                raise("No plugin.aes.client_cert_dir configuration option specified") unless @config.pluginconf.include?("aes.client_cert_dir")
+                @config.pluginconf["aes.client_cert_dir"]
             end
 
             # Takes our cert=foo callerids and return the foo bit else nil
