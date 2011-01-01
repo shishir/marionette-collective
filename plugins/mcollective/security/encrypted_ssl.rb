@@ -83,6 +83,9 @@ module MCollective
                 end
 
                 return body
+            rescue Exception => e
+                @log.warn("Could not decrypt message from client: #{e.class}: #{e}")
+                raise SecurityValidationFailed, "Could not decrypt message"
             end
 
             # Encodes a reply
