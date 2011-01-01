@@ -233,7 +233,7 @@ module MCollective
             # Figures out the client public key either from MCOLLECTIVE_AES_PUBLIC or the
             # plugin.aes.client_public config option
             def client_public_key
-                return ENV["MCOLLECTIVE_ARS_PUBLIC"] if ENV.include?("MCOLLECTIVE_AES_PUBLIC")
+                return ENV["MCOLLECTIVE_AES_PUBLIC"] if ENV.include?("MCOLLECTIVE_AES_PUBLIC")
 
                 raise("No plugin.aes.client_public configuration option specified") unless @config.pluginconf.include?("aes.client_public")
 
