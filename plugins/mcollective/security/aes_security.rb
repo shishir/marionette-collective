@@ -59,7 +59,7 @@ module MCollective
                 # if we get a message that has a pubkey attached and we're set to learn
                 # then add it to the client_cert_dir this should only happen on servers
                 # since clients will get replies using their own pubkeys
-                if @config.pluginconf.include?("aes.learn_pubkeys") && @config.pluginconf["aes.learn_pubkeys"] == 1
+                if @config.pluginconf.include?("aes.learn_pubkeys") && @config.pluginconf["aes.learn_pubkeys"] == "1"
                     if body.include?(:sslpubkey)
                         if client_cert_dir
                             certname = certname_from_callerid(body[:callerid])
@@ -121,7 +121,7 @@ module MCollective
                        :sslkey => crypted[:key],
                        :body => crypted[:data]}
 
-                if @config.pluginconf.include?("aes.send_pubkey") && @config.pluginconf["aes.send_pubkey"] == 1
+                if @config.pluginconf.include?("aes.send_pubkey") && @config.pluginconf["aes.send_pubkey"] == "1"
                     if @initiated_by == :client
                         req[:sslpubkey] = File.read(client_public_key)
                     else
