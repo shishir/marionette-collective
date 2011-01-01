@@ -13,7 +13,7 @@ module MCollective
         #   given access to network or machine due to the broadcast nature of mcollective
         # - Replies are encrypted using the calling clients public key.  Thus no-one but
         #   the caller can view the contents of replies.
-        # - Servers can all have their own SSL keys, or share one, or reuse keys created
+        # - Servers can all have their own RSA keys, or share one, or reuse keys created
         #   by other PKI using software like Puppet
         # - Requests from servers - like registration data - can be secured even to external
         #   eaves droppers depending on the level of configuration you are prepared to do
@@ -29,28 +29,28 @@ module MCollective
         #    securityprovider = aes_security
         #
         #    # Use YAML as serializer
-        #    plugin.ssl.serializer = yaml
+        #    plugin.aes.serializer = yaml
         #
         #    # Send our public key with every request so servers can learn it
-        #    plugin.ssl.send_pubkey = 1
+        #    plugin.aes.send_pubkey = 1
         #
         # Clients:
         #
         #    # The clients public and private keys
-        #    plugin.ssl.client_private = /home/user/.mcollective.d/user-private.pem
-        #    plugin.ssl.client_public = /home/user/.mcollective.d/user.pem
+        #    plugin.aes.client_private = /home/user/.mcollective.d/user-private.pem
+        #    plugin.aes.client_public = /home/user/.mcollective.d/user.pem
         #
         # Servers:
         #
         #    # Where to cache client keys or find manually distributed ones
-        #    plugin.ssl.client_cert_dir = /etc/mcollective/ssl/clients
+        #    plugin.aes.client_cert_dir = /etc/mcollective/ssl/clients
         #
         #    # Cache public keys promiscuously from the network
-        #    plugin.ssl.learn_pubkeys = 1
+        #    plugin.aes.learn_pubkeys = 1
         #
         #    # The servers public and private keys
-        #    plugin.ssl.server_private = /etc/mcollective/ssl/server-private.pem
-        #    plugin.ssl.server_public = /etc/mcollective/ssl/server-public.pem
+        #    plugin.aes.server_private = /etc/mcollective/ssl/server-private.pem
+        #    plugin.aes.server_public = /etc/mcollective/ssl/server-public.pem
         #
         class Aes_security<Base
             def decodemsg(msg)
@@ -220,41 +220,41 @@ module MCollective
                 client_cert_dir + "/#{clientid}.pem"
             end
 
-            # Figures out the client private key either from MCOLLECTIVE_SSL_PRIVATE or the
-            # plugin.ssl.client_private config option
+            # Figures out the client private key either from MCOLLECTIVE_AES_PRIVATE or the
+            # plugin.aes.client_private config option
             def client_private_key
-                return ENV["MCOLLECTIVE_SSL_PRIVATE"] if ENV.include?("MCOLLECTIVE_SSL_PRIVATE")
+                return ENV["MCOLLECTIVE_AES_PRIVATE"] if ENV.include?("MCOLLECTIVE_AES_PRIVATE")
 
-                raise("No plugin.ssl.client_private configuration option specified") unless @config.pluginconf.include?("ssl.client_private")
+                raise("No plugin.aes.client_private configuration option specified") unless @config.pluginconf.include?("ssl.client_private")
 
                 return @config.pluginconf["ssl.client_private"]
             end
 
-            # Figures out the client public key either from MCOLLECTIVE_SSL_PUBLIC or the
-            # plugin.ssl.client_public config option
+            # Figures out the client public key either from MCOLLECTIVE_AES_PUBLIC or the
+            # plugin.aes.client_public config option
             def client_public_key
-                return ENV["MCOLLECTIVE_SSL_PUBLIC"] if ENV.include?("MCOLLECTIVE_SSL_PUBLIC")
+                return ENV["MCOLLECTIVE_ARS_PUBLIC"] if ENV.include?("MCOLLECTIVE_AES_PUBLIC")
 
-                raise("No plugin.ssl.client_public configuration option specified") unless @config.pluginconf.include?("ssl.client_public")
+                raise("No plugin.aes.client_public configuration option specified") unless @config.pluginconf.include?("ssl.client_public")
 
                 return @config.pluginconf["ssl.client_public"]
             end
 
-            # Figures out the server public key from the plugin.ssl.server_public config option
+            # Figures out the server public key from the plugin.aes.server_public config option
             def server_public_key
                 raise("No ssl.server_public configuration option specified") unless @config.pluginconf.include?("ssl.server_public")
                 return @config.pluginconf["ssl.server_public"]
             end
 
-            # Figures out the server private key from the plugin.ssl.server_private config option
+            # Figures out the server private key from the plugin.aes.server_private config option
             def server_private_key
-                raise("No plugin.ssl.server_private configuration option specified") unless @config.pluginconf.include?("ssl.server_private")
+                raise("No plugin.aes.server_private configuration option specified") unless @config.pluginconf.include?("ssl.server_private")
                 @config.pluginconf["ssl.server_private"]
             end
 
-            # Figures out where to get client public certs from the plugin.ssl.client_cert_dir config option
+            # Figures out where to get client public certs from the plugin.aes.client_cert_dir config option
             def client_cert_dir
-                raise("No plugin.ssl.client_cert_dir configuration option specified") unless @config.pluginconf.include?("ssl.client_cert_dir")
+                raise("No plugin.aes.client_cert_dir configuration option specified") unless @config.pluginconf.include?("ssl.client_cert_dir")
                 @config.pluginconf["ssl.client_cert_dir"]
             end
 

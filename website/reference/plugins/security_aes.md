@@ -112,16 +112,16 @@ access to private keys before they can start observing parts of the exchange.
 |Attackers can create new nodes and inject registration data for those new nodes|no|
 
 To configure this scenario use the following options and manually copy public keys to the
-_plugin.ssl.client`_`cert`_`dir_ directory:
+_plugin.aes.client`_`cert`_`dir_ directory:
 
 |Settings|Value|Descritpion|
 |--------|-----|-----------|
-|plugin.ssl.send_pubkey|0|Do not send public keys|
-|plugin.ssl.learn_pubkeys|0|Do not learn public keys|
+|plugin.aes.send_pubkey|0|Do not send public keys|
+|plugin.aes.learn_pubkeys|0|Do not learn public keys|
 
 ### Automatic public key distribution with each server and client having unique keys
 
-Here we enable the  _plugin.ssl.learn`_`pubkeys_ feature on all servers.  Your public keys
+Here we enable the  _plugin.aes.learn`_`pubkeys_ feature on all servers.  Your public keys
 will now be distributed automatically on demand but you loose some security in that anyone
 with access to your network or middleware can observe the contents of replies and registration
 data
@@ -146,12 +146,12 @@ deploy a [Authorization][SimpleRPCAuthorization] plugin that denies unknown clie
 |Attackers can create new nodes and inject registration data for those new nodes|*yes*|
 
 To configure this scenario use the following options and ensure the _mcollectived_ can write
-to the _plugin.ssl.client`_`cert`_`dir_ directory:
+to the _plugin.aes.client`_`cert`_`dir_ directory:
 
 |Settings|Value|Descritpion|
 |--------|-----|-----------|
-|plugin.ssl.send_pubkey|1|Send public keys|
-|plugin.ssl.learn_pubkeys|1|Learn public keys|
+|plugin.aes.send_pubkey|1|Send public keys|
+|plugin.aes.learn_pubkeys|1|Learn public keys|
 
 ### Manual public key distribution with servers sharing a key pair and clients having unique keys
 
@@ -178,12 +178,12 @@ overhead.
 |Registration data can be protected from rogue agents posing as registration agents|*no*|
 
 To configure this scenario use the following options and ensure the _mcollectived_ can write
-to the _plugin.ssl.client`_`cert`_`dir_ directory:
+to the _plugin.aes.client`_`cert`_`dir_ directory:
 
 |Settings|Value|Descritpion|
 |--------|-----|-----------|
-|plugin.ssl.send_pubkey|0|Do not send public keys|
-|plugin.ssl.learn_pubkeys|0|Do not learn public keys|
+|plugin.aes.send_pubkey|0|Do not send public keys|
+|plugin.aes.learn_pubkeys|0|Do not learn public keys|
 
 ### Automatic public key distribution with servers sharing a key and client having unique keys
 
@@ -191,7 +191,7 @@ This is comparable to the older SSL plugin where all servers shared the same pub
 pair.  Here anyone who is part of the network can decrypt the traffic related to registration
 but replies to clients are still securely encrypted and visable only to them.
 
-Here we enable the  _plugin.ssl.learn`_`pubkeys_ feature on all servers.  Your public keys
+Here we enable the  _plugin.aes.learn`_`pubkeys_ feature on all servers.  Your public keys
 will now be distributed automatically on demand but you loose some security in that anyone
 with access to your network or middleware can observe the contents of replies and registration
 data
@@ -215,12 +215,12 @@ deploy a [Authorization][SimpleRPCAuthorization] plugin that denies unknown clie
 |Registration data can be protected from rogue agents posing as registration agents|*no*|
 
 To configure this scenario use the following options and ensure the _mcollectived_ can write
-to the _plugin.ssl.client`_`cert`_`dir_ directory:
+to the _plugin.aes.client`_`cert`_`dir_ directory:
 
 |Settings|Value|Descritpion|
 |--------|-----|-----------|
-|plugin.ssl.send_pubkey|1|Send public keys|
-|plugin.ssl.learn_pubkeys|1|Learn public keys|
+|plugin.aes.send_pubkey|1|Send public keys|
+|plugin.aes.learn_pubkeys|1|Learn public keys|
 
 ## Creating keys
 
@@ -259,24 +259,24 @@ Clients will still need their own keys made and distributed.
 |Setting|Example / Default|Description
 |-------|-----------------|-----------|
 |securityprovider|aes_security|Enables this security provider|
-|plugin.ssl.serializer|yaml or marshal|Serialization to use|
-|plugin.ssl.send_pubkey|0 or 1|Send the public key with every request|
-|plugin.ssl.learn_pubkeys|0 or 1|Receive public keys from the network and cache them locally|
+|plugin.aes.serializer|yaml or marshal|Serialization to use|
+|plugin.aes.send_pubkey|0 or 1|Send the public key with every request|
+|plugin.aes.learn_pubkeys|0 or 1|Receive public keys from the network and cache them locally|
 
 ### Client Options
 
 |Setting|Example / Default|Description
 |-------|-----------------|-----------|
-|plugin.ssl.client_private|/home/user/.mcollective.d/user-private.pem|The private key path for the user|
-|plugin.ssl.client_public|/home/user/.mcollective.d/user.pem|The public key path for the user|
+|plugin.aes.client_private|/home/user/.mcollective.d/user-private.pem|The private key path for the user|
+|plugin.aes.client_public|/home/user/.mcollective.d/user.pem|The public key path for the user|
 
 ### Server Options
 
 |Setting|Example / Default|Description
 |-------|-----------------|-----------|
-|plugin.ssl.client_cert_dir|/etc/mcollective/ssl/clients|Where to store and load client public keys|
-|plugin.ssl.server_private|/etc/mcollective/ssl/server-private.pem|Server private key|
-|plugin.ssl.server_public|/etc/mcollective/ssl/server-public.pem|Server public key|
+|plugin.aes.client_cert_dir|/etc/mcollective/ssl/clients|Where to store and load client public keys|
+|plugin.aes.server_private|/etc/mcollective/ssl/server-private.pem|Server private key|
+|plugin.aes.server_public|/etc/mcollective/ssl/server-public.pem|Server public key|
 
 
 
