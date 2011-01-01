@@ -19,10 +19,6 @@ for The Marionette Collective.
 
 Please review the [Security Overview][SecurityOverview] for a general discussion about security in Marionette Collective.
 
-The earlier [SSLSecurity] only provided message signing and identification of clients, this
-new plugin builds on this adding payload encryption, identification of servers and optional
-automatic key distribution.
-
 The design goals of this plugin are:
 
  * Each actor - clients and servers - can have their own set of public and private keys
@@ -46,6 +42,15 @@ to every private key of every client to see all the reply data.
 
 Serialization uses Marshal or YAML, which means data types in and out of mcollective
 will be preserved from client to server and reverse.
+
+## Compared to the SSL plugin
+
+The earlier [SSLSecurity] only provided message signing and identification of clients, this
+new plugin builds on this adding payload encryption, identification of servers and optional
+automatic key distribution.
+
+The [SSLSecurity] plugin puts less drain on resources, if you do not specifically need encryption
+you should consider using that one instead.
 
 ## Deployment Scenarios
 
