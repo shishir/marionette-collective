@@ -26,16 +26,13 @@ module MCollective
         # Common Options:
         #
         #    # Enable this plugin
-        #    securityprovider = encrypted_ssl
+        #    securityprovider = aes_security
         #
         #    # Use YAML as serializer
         #    plugin.ssl.serializer = yaml
         #
         #    # Send our public key with every request so servers can learn it
         #    plugin.ssl.send_pubkey = 1
-        #
-        #    # Cache public keys promiscuously from the network
-        #    plugin.ssl.learn_pubkeys = 1
         #
         # Clients:
         #
@@ -45,21 +42,24 @@ module MCollective
         #
         # Servers:
         #
-        #    # Where to cache client keys
+        #    # Where to cache client keys or find manually distributed ones
         #    plugin.ssl.client_cert_dir = /etc/mcollective/ssl/clients
+        #
+        #    # Cache public keys promiscuously from the network
+        #    plugin.ssl.learn_pubkeys = 1
         #
         #    # The servers public and private keys
         #    plugin.ssl.server_private = /etc/mcollective/ssl/server-private.pem
         #    plugin.ssl.server_public = /etc/mcollective/ssl/server-public.pem
         #
-        class Encrypted_ssl<Base
+        class Aes_security<Base
             def decodemsg(msg)
                 body = deserialize(msg.payload)
 
                 # if we get a message that has a pubkey attached and we're set to learn
                 # then add it to the client_cert_dir this should only happen on servers
                 # since clients will get replies using their own pubkeys
-                if @config.pluginconf["ssl.learn_pubkeys"]
+                if @config.pluginconf.include?("ssl.learn_pubkeys") && @config.pluginconf["ssl.learn_pubkeys"] == 1
                     if body.include?(:sslpubkey)
                         if client_cert_dir
                             certname = certname_from_callerid(body[:callerid])
@@ -121,7 +121,7 @@ module MCollective
                        :sslkey => crypted[:key],
                        :body => crypted[:data]}
 
-                if @config.pluginconf["ssl.send_pubkey"]
+                if @config.pluginconf.include?("ssl.send_pubkey") && @config.pluginconf["ssl.send_pubkey"] == 1
                     if @initiated_by == :client
                         req[:sslpubkey] = File.read(client_public_key)
                     else
