@@ -56,13 +56,18 @@ module MCollective
                 configfile = f
             end
 
+            parser.program_name = $0
+
             parser.on("--help")
+
+            # avoid option parsers own internal version handling that sux
+            parser.on("-v", "--verbose")
 
             parser.environment("MCOLLECTIVE_EXTRA_OPTS")
 
             begin
                 parser.parse!
-            rescue OptionParser::InvalidOption => e
+            rescue OptionParser::InvalidOption
                 retry
             end
 
