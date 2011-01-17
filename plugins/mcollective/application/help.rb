@@ -6,7 +6,7 @@ module MCollective
             puts "The Marionette Collection verion #{MCollective.version}"
             puts
 
-            Applications.list.each do |app|
+            Applications.list.sort.each do |app|
                 puts "  %-10s      %s" % [app, Applications[app].application_description]
             end
 

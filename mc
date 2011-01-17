@@ -4,21 +4,23 @@ require 'mcollective'
 
 known_applications = MCollective::Applications.list
 
-if known_applications.include?(ARGV.first)
+# links from mc-ping to mc will result in ping being run
+if $0 =~ /mc\-(.+)$/
+    app_name = $1
+else
     app_name = ARGV.first
     ARGV.delete_at(0)
+end
 
+if known_applications.include?(app_name)
     # make sure the various options classes shows the right help etc
     $0 = app_name
 
     MCollective::Applications.run(app_name)
-
-    exit
+else
+    puts "The Marionette Collective verion #{MCollective.version}"
+    puts
+    puts "#{$0}: sub-application (options)"
+    puts
+    puts "Known sub applications: #{known_applications.join " "}"
 end
-
-
-puts "The Marionette Collective verion #{MCollective.version}"
-puts
-puts "#{$0}: sub-application (options)"
-puts
-puts "Known sub applications: #{known_applications.join " "}"
