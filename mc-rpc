@@ -19,8 +19,10 @@ def booleanish_to_boolean(arguments, ddl)
             if ddl[:input][key][:type] == :boolean
                 arguments[key] = true if arguments[key] == "true"
                 arguments[key] = true if arguments[key] == "yes"
+                arguments[key] = true if arguments[key] == "1"
                 arguments[key] = false if arguments[key] == "false"
                 arguments[key] = false if arguments[key] == "no"
+                arguments[key] = false if arguments[key] == "0"
             end
         end
     end
