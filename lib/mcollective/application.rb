@@ -45,10 +45,6 @@ module MCollective
             end
         end
 
-        def initialize
-            application_parse_options
-        end
-
         def configuration
             @application_configuration ||= {}
             @application_configuration
@@ -74,12 +70,18 @@ module MCollective
                         opts_array << carg[:arguments]
                     end
 
-                    opts_array << carg[:type] if carg[:type]
+                    opts_array << carg[:type] if carg[:type] and carg[:type] != :bool
 
                     opts_array << carg[:description]
 
-                    parser.send(*opts_array) do |v|
-                        configuration[carg[:name]] = v
+                    if carg[:type] == :bool
+                        parser.send(*opts_array) do |v|
+                            configuration[carg[:name]] = true
+                        end
+                    else
+                        parser.send(*opts_array) do |v|
+                            configuration[carg[:name]] = v
+                        end
                     end
                 end
             end
@@ -130,6 +132,8 @@ module MCollective
         end
 
         def run
+            application_parse_options
+
             validate_configuration(configuration) if respond_to?(:validate_configuration)
 
             main
