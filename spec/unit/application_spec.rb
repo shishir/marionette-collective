@@ -105,6 +105,7 @@ module MCollective
 
             it "should enforce required options" do
                 Application.any_instance.stubs("exit!").returns(true)
+                Application.any_instance.stubs("main").returns(true)
                 OptionParser.any_instance.stubs("parse!").returns(true)
                 IO.any_instance.expects(:puts).with(anything).at_least_once
                 IO.any_instance.expects(:puts).with("The foo option is mandatory").at_least_once
@@ -117,7 +118,7 @@ module MCollective
                                    :required => true,
                                    :arguments => "--foo [FOO]"
 
-                Application.new
+                Application.new.run
 
                 ARGV.clear
                 @argv_backup.each{|a| ARGV << a}
@@ -126,6 +127,7 @@ module MCollective
             it "should call post_option_parser" do
                 OptionParser.any_instance.stubs("parse!").returns(true)
                 Application.any_instance.stubs("post_option_parser").returns(true).at_least_once
+                Application.any_instance.stubs("main").returns(true)
 
                 ARGV.clear
                 ARGV << "--foo=bar"
@@ -134,7 +136,7 @@ module MCollective
                                    :description => "meh",
                                    :arguments => "--foo [FOO]"
 
-                Application.new
+                Application.new.run
 
                 ARGV.clear
                 @argv_backup.each{|a| ARGV << a}
@@ -144,6 +146,7 @@ module MCollective
                 OptionParser.any_instance.stubs("parse!").returns(true)
                 OptionParser.any_instance.expects(:on).with(anything, anything, anything, anything).at_least_once
                 OptionParser.any_instance.expects(:on).with('--foo [FOO]', String, 'meh').at_least_once
+                Application.any_instance.stubs("main").returns(true)
 
                 ARGV.clear
                 ARGV << "--foo=bar"
@@ -152,7 +155,7 @@ module MCollective
                                    :description => "meh",
                                    :arguments => "--foo [FOO]"
 
-                Application.new
+                Application.new.run
 
                 ARGV.clear
                 @argv_backup.each{|a| ARGV << a}
@@ -160,10 +163,11 @@ module MCollective
         end
 
         describe "#initialize" do
-            it "should parse the command line options at startup" do
+            it "should parse the command line options at application run" do
                 Application.any_instance.expects("application_parse_options").once
+                Application.any_instance.stubs("main").returns(true)
 
-                Application.new
+                Application.new.run
             end
         end
 
@@ -207,6 +211,8 @@ module MCollective
 
         describe "#configuration" do
             it "should return the correct configuration" do
+                Application.any_instance.stubs("main").returns(true)
+
                 ARGV.clear
                 ARGV << "--foo=bar"
 
@@ -214,7 +220,10 @@ module MCollective
                                    :description => "meh",
                                    :arguments => "--foo [FOO]"
 
-                Application.new.configuration.should == {:foo => "bar"}
+                a = Application.new
+                a.run
+
+                a.configuration.should == {:foo => "bar"}
 
                 ARGV.clear
                 @argv_backup.each{|a| ARGV << a}
