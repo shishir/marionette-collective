@@ -57,7 +57,13 @@ module MCollective
         def application_parse_options
             @options = rpcoptions do |parser, options|
                 parser.define_head application_description if application_description
+                parser.separator ""
+
                 parser.banner = application_usage if application_usage
+
+                parser.define_tail ""
+                parser.define_tail "The Marionette Collective #{MCollective.version}"
+
 
                 application_cli_arguments.each do |carg|
                     opts_array = []
