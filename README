@@ -1,6 +1,9 @@
-The Marionette Collective
-=========================
+experimental branch that can do rpc calls in batches:
 
-The Marionette Collective aka. mcollective is a framework to build server orchestration or parallel job execution systems.
+include MCollective::RPC
+n = rpcclient("nrpe", {:configfile => "etc/client.cfg"});nil
+printrpc n.runcommand(:command => "check_disks", :group_size => 10)
 
-For full information, wikis, ticketing and downloads please see http://marionette-collective.org/
+will do a discovery, set up the progress bar and then do many rpc requests
+of 10 nodes each till all the machines have been run, useful for doing things
+like apt-get updates where you wish to limit the impact

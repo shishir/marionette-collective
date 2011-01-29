@@ -426,9 +426,8 @@ module MCollective
                     args[:process_results] = true
                 end
 
-                # Do discovery when no specific discovery
-                # array is given
-                disc = discover if disc == :auto
+                # Do discovery when no specific discovery array is given
+                disc = discover.clone if disc == :auto
 
                 req = new_request(action.to_s, args)
 
@@ -436,20 +435,55 @@ module MCollective
 
                 result = []
                 respcount = 0
+                group_size = nil
 
                 if disc.size > 0
-                    @client.req(req, @agent, opts, disc.size) do |resp|
-                        respcount += 1
+                    if args.include?(:group_size)
+                        group_size = args[:group_size]
+                        args.delete(:group_size)
+                    end
 
-                        if block_given?
-                            process_results_with_block(action, resp, block)
-                        else
-                            if @progress
-                                puts if respcount == 1
-                                print twirl.twirl(respcount, disc.size)
+                    if group_size
+                        nodes_left = disc.clone
+
+                        groups = nodes_left.size / group_size
+
+                        (groups + 1).times do |group_count|
+                            selected_nodes = nodes_left.take(group_size)
+                            selected_nodes.each{|n| nodes_left.delete(n)}
+
+                            id_filter = "/^" <<  selected_nodes.join("|") << "$/"
+                            opts[:filter]["identity"] = id_filter
+
+                            client.req(req, @agent, opts, selected_nodes.size) do |resp|
+                                respcount += 1
+
+                                if block_given?
+                                    process_results_with_block(action, resp, block)
+                                else
+                                    if @progress
+                                        puts if respcount == 1
+                                        print twirl.twirl(respcount, disc.size)
+                                    end
+
+                                    result << process_results_without_block(resp, action)
+                                end
                             end
+                        end
+                    else
+                        client.req(req, @agent, opts, disc.size) do |resp|
+                            respcount += 1
 
-                            result << process_results_without_block(resp, action)
+                            if block_given?
+                                process_results_with_block(action, resp, block)
+                            else
+                                if @progress
+                                    puts if respcount == 1
+                                    print twirl.twirl(respcount, disc.size)
+                                end
+
+                                result << process_results_without_block(resp, action)
+                            end
                         end
                     end
 
