@@ -3,7 +3,6 @@ class MCollective::Application::Rpc<MCollective::Application
 
     usage "mc-rpc [options] [filters] --agent <agent> --action <action> [--argument <key=val> --argument ...]"
     usage "mc-rpc [options] [filters] <agent> <action> [<key=val> <key=val> ...]"
-    usage "mc-rpc --agent-help agent"
 
     option :no_results,
         :description    => "Do not process results, just send request",
