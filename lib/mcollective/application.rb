@@ -23,7 +23,7 @@ module MCollective
             end
 
             def usage(usage)
-                self[:usage] = usage
+                self[:usage] << usage
             end
 
             def option(name, arguments)
@@ -31,7 +31,8 @@ module MCollective
                        :description => nil,
                        :arguments => [],
                        :type => String,
-                       :required => false}
+                       :required => false,
+                       :validate => Proc.new { true }}
 
                 arguments.each_pair{|k,v| opt[k] = v}
 
@@ -40,7 +41,7 @@ module MCollective
 
             def intialize_application_options
                 @application_options = {:description   => nil,
-                                        :usage         => nil,
+                                        :usage         => [],
                                         :cli_arguments => []}
             end
         end
@@ -54,12 +55,29 @@ module MCollective
             @options
         end
 
+        def validate_option(blk, name, value)
+            validation_result = blk.call(value)
+
+            unless validation_result == true
+                STDERR.puts "Validation of #{name} failed: #{validation_result}"
+                exit! 1
+            end
+        end
+
         def application_parse_options
             @options = rpcoptions do |parser, options|
                 parser.define_head application_description if application_description
-                parser.separator ""
+                parser.banner = ""
 
-                parser.banner = application_usage if application_usage
+                if application_usage
+                    parser.separator ""
+
+                    application_usage.each do |u|
+                        parser.separator "Usage: #{u}"
+                    end
+
+                    parser.separator ""
+                end
 
                 parser.define_tail ""
                 parser.define_tail "The Marionette Collective #{MCollective.version}"
@@ -70,22 +88,43 @@ module MCollective
 
                     opts_array << :on
 
+                    # if a default is set from the application set it up front
+                    if carg.include?(:default)
+                        configuration[carg[:name]] = carg[:default]
+                    end
+
+                    # :arguments are multiple possible ones
                     if carg[:arguments].is_a?(Array)
                         carg[:arguments].each {|a| opts_array << a}
                     else
                         opts_array << carg[:arguments]
                     end
 
-                    opts_array << carg[:type] if carg[:type] and carg[:type] != :bool
+                    # type was given and its not one of our special types, just pass it onto optparse
+                    opts_array << carg[:type] if carg[:type] and ! [:bool, :array].include?(carg[:type])
 
                     opts_array << carg[:description]
 
+                    # Handle our special types else just rely on the optparser to handle the types
                     if carg[:type] == :bool
                         parser.send(*opts_array) do |v|
+                            validate_option(carg[:validate], carg[:name], v)
+
                             configuration[carg[:name]] = true
                         end
+
+                    elsif carg[:type] == :array
+                        parser.send(*opts_array) do |v|
+                            validate_option(carg[:validate], carg[:name], v)
+
+                            configuration[carg[:name]] = [] unless configuration.include?(carg[:name])
+                            configuration[carg[:name]] << v
+                        end
+
                     else
                         parser.send(*opts_array) do |v|
+                            validate_option(carg[:validate], carg[:name], v)
+
                             configuration[carg[:name]] = v
                         end
                     end
@@ -95,6 +134,7 @@ module MCollective
             # Check all required parameters were set
             validation_passed = true
             application_cli_arguments.each do |carg|
+                # Check for required arguments
                 if carg[:required]
                     unless configuration[ carg[:name] ]
                         validation_passed = false
@@ -118,7 +158,9 @@ module MCollective
         end
 
         def application_usage
-            self.class.application_options[:usage]
+            usage = self.class.application_options[:usage]
+
+            usage.empty? ? false : usage
         end
 
         def application_cli_arguments
