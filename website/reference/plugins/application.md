@@ -11,7 +11,21 @@ disqus: true
  {:toc}
 
 ## Overview
-The Marionette Collective 1.1.1 and newer supports a single executable - called mc - and have a plugin type called application that lets you create applications for this single executable.
+The Marionette Collective 1.1.1 and newer supports a single executable - called
+mc - and have a plugin type called application that lets you create
+applications for this single executable.
+
+In the past we tended to write small standalone scripts to interact with
+MCollective, this had a number of issues:
+
+ * Large number of executables in _/usr/sbin_
+ * Applications behave inconsistently wrt to error handling and reporting
+ * Doscovering new applications difficult since they are all over the filesystem
+ * Installation and packaging of plugins is complex
+
+We've attempted to address these concerns by creating a single point of access
+for all applications - the _mc_ script - with unified help, error reporting and
+option parsing.
 
 Below you can see the single executable system in use:
 
