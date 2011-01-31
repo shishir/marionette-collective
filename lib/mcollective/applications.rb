@@ -74,7 +74,9 @@ module MCollective
             ARGV.clear
             original_argv.each {|a| ARGV << a}
 
-            Config.instance.loadconfig(configfile) if configfile
+            configfile = Util.config_file_for_user unless configfile
+
+            Config.instance.loadconfig(configfile)
         end
     end
 end
