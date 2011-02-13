@@ -65,6 +65,8 @@ module MCollective
                     if dest.match(regex)
                         collective = $1
                         agent = $2
+                    else
+                        raise "Failed to handle message, could not figure out agent and collective from #{dest}"
                     end
 
                     if agent == "mcollective"
@@ -72,7 +74,7 @@ module MCollective
 
                         controlmsg(msg, collective)
                     else
-                        Log.debug("Handling message for agent '#{agent}'")
+                        Log.debug("Handling message for agent '#{agent}' on collective '#{collective}'")
 
                         agentmsg(msg, agent, collective)
                     end
