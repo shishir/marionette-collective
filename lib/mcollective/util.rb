@@ -160,12 +160,12 @@ module MCollective
 
             if collective.nil?
                 config.collectives.map do |c|
-                    ["#{config.topicprefix}/#{c}", agent, type].join(config.topicsep)
+                    ["#{config.topicprefix}#{c}", agent, type].join(config.topicsep)
                 end
             else
                 raise("Unknown collective '#{collective}' known collectives are '#{config.collectives.join ', '}'") unless config.collectives.include?(collective)
 
-                ["#{config.topicprefix}/#{collective}", agent, type].join(config.topicsep)
+                ["#{config.topicprefix}#{collective}", agent, type].join(config.topicsep)
             end
         end
 

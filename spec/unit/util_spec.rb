@@ -18,7 +18,7 @@ module MCollective
             it "should create topics for each collective" do
                 c = MCollective::Config.instance
                 c.instance_variable_set("@collectives", ["one", "two"])
-                c.instance_variable_set("@topicprefix", "/topic")
+                c.instance_variable_set("@topicprefix", "/topic/")
                 c.instance_variable_set("@topicsep", ".")
 
                 Util.make_target("foo", :command).should == ["/topic/one.foo.command", "/topic/two.foo.command"]
@@ -36,7 +36,7 @@ module MCollective
             it "should support creating a topic for a specific collective" do
                 c = MCollective::Config.instance
                 c.instance_variable_set("@collectives", ["one", "two"])
-                c.instance_variable_set("@topicprefix", "/topic")
+                c.instance_variable_set("@topicprefix", "/topic/")
                 c.instance_variable_set("@topicsep", ".")
 
                 Util.make_target("foo", :command, "one").should == "/topic/one.foo.command"
@@ -102,7 +102,7 @@ module MCollective
                 empty_filter = Util.empty_filter
                 config_file = Util.config_file_for_user
 
-                Util.default_options.should == {:verbose => false, :disctimeout => 2, :timeout => 5, :config => config_file, :filter => empty_filter}
+                Util.default_options.should == {:verbose => false, :disctimeout => 2, :timeout => 5, :config => config_file, :filter => empty_filter, :collective => nil}
             end
         end
 

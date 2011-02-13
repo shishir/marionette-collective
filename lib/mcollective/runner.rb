@@ -61,7 +61,7 @@ module MCollective
 
                     sep = Regexp.escape(@config.topicsep)
                     prefix = Regexp.escape(@config.topicprefix)
-                    regex = "#{prefix}\\/(.+?)#{sep}(.+?)#{sep}command"
+                    regex = "#{prefix}(.+?)#{sep}(.+?)#{sep}command"
                     if dest.match(regex)
                         collective = $1
                         agent = $2
