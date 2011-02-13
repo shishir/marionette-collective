@@ -155,14 +155,14 @@ module MCollective
         def self.make_target(agent, type, collective=nil)
             config = Config.instance
 
-            raise("Uknown target type #{type}") unless type == :command || type == :reply
+            raise("Unknown target type #{type}") unless type == :command || type == :reply
 
             if collective.nil?
                 config.collectives.map do |c|
                     ["#{config.topicprefix}/#{c}", agent, type].join(config.topicsep)
                 end
             else
-                raise("Uknown collective '#{collective}' known collectives are '#{config.collectives.join ', '}'") unless config.collectives.include?(collective)
+                raise("Unknown collective '#{collective}' known collectives are '#{config.collectives.join ', '}'") unless config.collectives.include?(collective)
 
                 ["#{config.topicprefix}/#{collective}", agent, type].join(config.topicsep)
             end
