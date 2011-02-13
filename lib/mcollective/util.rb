@@ -144,6 +144,7 @@ module MCollective
              :disctimeout => 2,
              :timeout     => 5,
              :config      => config_file_for_user,
+             :collective  => nil,
              :filter      => empty_filter}
         end
 

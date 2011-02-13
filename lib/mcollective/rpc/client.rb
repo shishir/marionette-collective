@@ -50,7 +50,7 @@ module MCollective
 
                 agent_filter agent
 
-                @client = client = MCollective::Client.new(@config)
+                @client = MCollective::Client.new(@config)
                 @client.options = options
 
                 # if we can find a DDL for the service override
@@ -346,6 +346,7 @@ module MCollective
                  :timeout => @timeout,
                  :verbose => @verbose,
                  :filter => @filter,
+                 :collective => @client.collective,
                  :config => @config}
             end
 
