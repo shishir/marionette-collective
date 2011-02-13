@@ -29,7 +29,7 @@ module MCollective
         # Sends a request and returns the generated request id, doesn't wait for
         # responses and doesn't execute any passed in code blocks for responses
         def sendreq(msg, agent, filter = {})
-            target = Util.make_target(agent, :command)
+            target = Util.make_target(agent, :command, @config.main_collective)
 
             reqid = Digest::MD5.hexdigest("#{@config.identity}-#{Time.now.to_f.to_s}-#{target}")
 
@@ -38,10 +38,10 @@ module MCollective
             Log.debug("Sending request #{reqid} to #{target}")
 
             unless @subscriptions.include?(agent)
-                topic = Util.make_target(agent, :reply)
+                topic = Util.make_target(agent, :reply, @config.main_collective)
                 Log.debug("Subscribing to #{topic}")
 
-                @connection.subscribe(topic)
+                Util.subscribe(topic)
                 @subscriptions[agent] = 1
             end
 
