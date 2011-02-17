@@ -105,7 +105,7 @@ module MCollective
                 ENV["MCOLLECTIVE_EXTRA_OPTS"] = filter_extra_options(ENV["MCOLLECTIVE_EXTRA_OPTS"].clone)
                 parser.environment("MCOLLECTIVE_EXTRA_OPTS")
             rescue Exception => e
-                puts "Failed to parse MCOLLECTIVE_EXTRA_OPTS: #{e}"
+                Log.error("Failed to parse MCOLLECTIVE_EXTRA_OPTS: #{e}")
             end
 
             begin
