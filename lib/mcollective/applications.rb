@@ -49,6 +49,7 @@ module MCollective
             return if Config.instance.configured
 
             original_argv = ARGV.clone
+            original_extra_opts = ENV["MCOLLECTIVE_EXTRA_OPTS"].clone
             configfile = nil
 
             parser = OptionParser.new
@@ -63,11 +64,41 @@ module MCollective
             # avoid option parsers own internal version handling that sux
             parser.on("-v", "--verbose")
 
-            parser.environment("MCOLLECTIVE_EXTRA_OPTS")
+            begin
+                # optparse will parse the whole ENV in one go and refuse
+                # to play along with the retry trick I do below so in
+                # order to handle unknown options properly I parse out
+                # only -c and --config deleting everything else and
+                # then restore the environment variable later when I
+                # am done with it
+                ENV["MCOLLECTIVE_EXTRA_OPTS"] = ""
+                words = Shellwords.shellwords(original_extra_opts)
+                words.each_with_index do |s,i|
+                    if s == "-c"
+                        ENV["MCOLLECTIVE_EXTRA_OPTS"] = "--config #{words[i + 1]}"
+                        break
+                    elsif s == "--config"
+                        ENV["MCOLLECTIVE_EXTRA_OPTS"] = "--config #{words[i + 1]}"
+                        break
+                    elsif s =~ /\-c=/
+                        ENV["MCOLLECTIVE_EXTRA_OPTS"] = s
+                        break
+                    elsif s =~ /\-\-config=/
+                        ENV["MCOLLECTIVE_EXTRA_OPTS"] = s
+                        break
+                    end
+                end
+
+                parser.environment("MCOLLECTIVE_EXTRA_OPTS")
+            rescue Exception => e
+                puts "Failed to parse MCOLLECTIVE_EXTRA_OPTS: #{e}"
+            end
+
+            ENV["MCOLLECTIVE_EXTRA_OPTS"] = original_extra_opts.clone
 
             begin
                 parser.parse!
-            rescue OptionParser::InvalidOption
+            rescue OptionParser::InvalidOption => e
                 retry
             end
 
