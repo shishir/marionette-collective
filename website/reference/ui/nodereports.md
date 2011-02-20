@@ -3,6 +3,7 @@ layout: default
 title: Node Reports
 disqus: true
 ---
+[Subcollectives]: ../basic/subcollectives.html
 
 # {{page.title}}
 
