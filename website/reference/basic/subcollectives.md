@@ -158,6 +158,27 @@ collectives and if you do not specify anything you should see all machines.
 Clients don't need to know about all collectives, only the ones they intend
 to communicate with.
 
+You can discover the list of known collectives and how many nodes are in each
+using the _inventory_ application:
+
+{% highlight console %}
+$ mc inventory --list-collectives
+
+ * [ ==================================== ] 52 / 52
+
+   Collective                     Nodes
+   ==========                     =====
+   za_collective                  2
+   us_collective                  7
+   uk_collective                  19
+   de_collective                  24
+   eu_collective                  45
+   mcollective                    52
+
+                     Total nodes: 52
+
+{% endhighlight %}
+
 # ActiveMQ Filters
 
 The above setup should just work in most cases but you might want to go one step
