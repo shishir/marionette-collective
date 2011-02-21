@@ -128,6 +128,8 @@ module MCollective
 
                 @libdir.each {|dir| Log.warn("Cannot find libdir: #{dir}") unless File.directory?(dir)}
 
+                Vendor.load_vendored
+
                 PluginManager.loadclass("Mcollective::Facts::#{@factsource}_facts")
                 PluginManager.loadclass("Mcollective::Connector::#{@connector}")
                 PluginManager.loadclass("Mcollective::Security::#{@securityprovider}")

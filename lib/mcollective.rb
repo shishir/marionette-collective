@@ -49,6 +49,7 @@ module MCollective
     autoload :SSL, "mcollective/ssl"
     autoload :Application, "mcollective/application"
     autoload :Applications, "mcollective/applications"
+    autoload :Vendor, "mcollective/vendor"
 
     VERSION="@DEVELOPMENT_VERSION@"
 
