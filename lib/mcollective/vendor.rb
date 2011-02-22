@@ -12,17 +12,30 @@ module MCollective
     # make adding them in optional so that distros can simply adjust their
     # packaging to exclude this directory and the various load_xxx.rb scripts
     # if they wish to install these gems as native packages.
-    module Vendor
-        def self.load_vendored
-            vendor_dir = File.join([File.dirname(__FILE__), "vendor"])
-            Dir.entries(vendor_dir).each do |entry|
-                if entry.match(/load_(\w+?)\.rb$/)
-                    Log.debug("Loading vendored #{$1}")
-                    load "#{vendor_dir}/#{entry}"
-                end
+    class Vendor
+        class << self
+            def vendor_dir
+                File.join([File.dirname(File.expand_path(__FILE__)), "vendor"])
             end
 
-            require 'mcollective/vendor/require_vendored'
+            def load_entry(entry)
+                Log.debug("Loading vendored #{$1}")
+                load "#{vendor_dir}/#{entry}"
+            end
+
+            def require_libs
+                require 'mcollective/vendor/require_vendored'
+            end
+
+            def load_vendored
+                Dir.entries(vendor_dir).each do |entry|
+                    if entry.match(/load_(\w+?)\.rb$/)
+                        load_entry entry
+                    end
+                end
+
+                require_libs
+            end
         end
     end
 end

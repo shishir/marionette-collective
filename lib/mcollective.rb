@@ -50,6 +50,9 @@ module MCollective
     autoload :Application, "mcollective/application"
     autoload :Applications, "mcollective/applications"
     autoload :Vendor, "mcollective/vendor"
+    autoload :Shell, "mcollective/shell"
+
+    MCollective::Vendor.load_vendored
 
     VERSION="@DEVELOPMENT_VERSION@"
 
