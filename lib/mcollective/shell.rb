@@ -1,9 +1,25 @@
 module MCollective
-    # Class to provide various wrappers to assist users
-    # running shell commands in a way thats robust and
-    # make it easy to access stdout, stderr and status
+    # Wrapper around systemu that handles executing of system commands
+    # in a way that makes stdout, stderr and status available.  Supports
+    # timeouts and sets a default sane environment.
+    #
+    #   s = Shell.new("date", opts)
+    #   s.runcommand
+    #   puts s.stdout
+    #   puts s.stderr
+    #   puts s.status.exitcode
+    #
+    # Options hash can have:
+    #
+    #   cwd         - the working directory the command will be run from
+    #   stdin       - a string that will be sent to stdin of the program
+    #   stdout      - a variable that will receive stdout, must support <<
+    #   stderr      - a variable that will receive stdin, must support <<
+    #   environment - the shell environment, defaults to include LC_ALL=C
+    #                 set to nil to clear the environment even of LC_ALL
+    #
     class Shell
-        attr_reader :environment, :command, :status, :stdout, :stderr
+        attr_reader :environment, :command, :status, :stdout, :stderr, :stdin, :cwd
 
         def initialize(command, options={})
             @environment = {"LC_ALL" => "C"}
@@ -11,6 +27,8 @@ module MCollective
             @status = nil
             @stdout = ""
             @stderr = ""
+            @stdin = nil
+            @cwd = "/tmp"
 
             options.each do |opt, val|
                 case opt.to_s
@@ -22,6 +40,14 @@ module MCollective
                         raise "stderr should support <<" unless val.respond_to?("<<")
                         @stderr = val
 
+                    when "stdin"
+                        raise "stdin should be a String" unless val.is_a?(String)
+                        @stdin = val
+
+                    when "cwd"
+                        raise "Directory #{val} does not exist" unless File.directory?(val)
+                        @cwd = val
+
                     when "environment"
                         if val.nil?
                             @environment = {}
@@ -30,13 +56,25 @@ module MCollective
                         end
                 end
             end
-
-            runcommand
         end
 
-        private
+        # Actually does the systemu call passing in the correct environment, stdout and stderr
         def runcommand
-            @status = systemu(@command, "env" => @environment, "stdout" => @stdout, "stderr" => @stderr)
+            opts = {"env"    => @environment,
+                    "stdout" => @stdout,
+                    "stderr" => @stderr,
+                    "cwd"    => @cwd}
+
+            opts["stdin"] = @stdin if @stdin
+
+            # Running waitpid on the cid here will start a thread
+            # with the waitpid in it, this way even if the thread
+            # that started this process gets killed due to agent
+            # timeout or such there will still be a waitpid waiting
+            # for the child to exit and not leave zombies.
+            @status = systemu(@command, opts) do |cid|
+                Process::waitpid(cid)
+            end
         end
     end
 end
