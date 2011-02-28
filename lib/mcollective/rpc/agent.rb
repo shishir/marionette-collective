@@ -199,6 +199,11 @@ module MCollective
 
                 shell.runcommand
 
+                if options[:chomp]
+                    shellopts[:stdout].chomp! if shellopts[:stdout].is_a?(String)
+                    shellopts[:stderr].chomp! if shellopts[:stderr].is_a?(String)
+                end
+
                 shell.status.exitstatus
             end
 

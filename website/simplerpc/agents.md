@@ -264,6 +264,22 @@ have the _<<_ method, so if you supplied an array each line of output will be a
 single member of the array.  In the example _out_ would be an array of lines
 while _err_ would just be a big multi line string.
 
+By default any trailing new lines will be included in the output and error:
+
+{% highlight ruby %}
+reply[:status] = run("echo 'hello world'", :stdout => :out, :stderr => :err)
+reply[:stdout].chomp!
+reply[:stderr].chomp!
+{% endhighlight %}
+
+You can shorten this to:
+
+{% highlight ruby %}
+reply[:status] = run("echo 'hello world'", :stdout => :out, :stderr => :err, :chomp => true)
+{% endhighlight %}
+
+This will remove a trailing new line from the _reply[:out]_ and _reply[:err]_.
+
 If you wanted this command to run from the _/tmp_ directory:
 
 {% highlight ruby %}
