@@ -93,11 +93,10 @@ module MCollective
         # returns an array of nodes
         def discover(filter, timeout)
             begin
-                Log.debug("Waiting #{timeout} seconds for discovery replies to request #{reqid}")
-
                 hosts = []
                 Timeout.timeout(timeout) do
                     reqid = sendreq("ping", "discovery", filter)
+                    Log.debug("Waiting #{timeout} seconds for discovery replies to request #{reqid}")
 
                     loop do
                         msg = receive(reqid)
