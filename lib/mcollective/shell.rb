@@ -73,7 +73,12 @@ module MCollective
             # timeout or such there will still be a waitpid waiting
             # for the child to exit and not leave zombies.
             @status = systemu(@command, opts) do |cid|
-                Process::waitpid(cid)
+                begin
+                    Process::waitpid(cid)
+                rescue SystemExit
+                rescue Exception => e
+                    Log.info("Unexpected exception received while waiting for child process: #{e.class}: #{e}")
+                end
             end
         end
     end
