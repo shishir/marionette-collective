@@ -29,7 +29,7 @@ module MCollective
         # We also currently have the validation code in here, this will be moved to plugins soon.
         class Agent
             attr_accessor :meta, :reply, :request
-            attr_reader :logger, :config, :timeout, :ddl, :shell_status, :shell_stderr, :shell_stdout
+            attr_reader :logger, :config, :timeout, :ddl
 
             def initialize
                 # Default meta data unset
@@ -45,9 +45,6 @@ module MCollective
                 @logger = Log.instance
                 @config = Config.instance
                 @agent_name = self.class.to_s.split("::").last.downcase
-                @shell_status = nil
-                @shell_stderr = nil
-                @shell_stdout = nil
 
                 # Loads the DDL so we can later use it for validation
                 # and help generation
@@ -143,24 +140,34 @@ module MCollective
             private
             # Runs a command via the MC::Shell wrapper, options are as per MC::Shell
             #
-            # To set reply[:foo] based on stdout do:
+            # The simplest use is:
             #
-            #   run("echo 1", :stdout => :foo)
+            #   out = ""
+            #   err = ""
+            #   status = run("echo 1", :stdout => out, :stderr => err)
             #
-            # The same pattern applies to stderr.
+            #   reply[:out] = out
+            #   reply[:error] = err
+            #   reply[:exitstatus] = status
             #
-            # After any shell command is run shell_stdout, shell_stderr and shell_status
-            # is set, the stdout is returned.
+            # This can be simplified as:
+            #
+            #   reply[:exitstatus] = run("echo 1", :stdout => :out, :stderr => :error)
+            #
+            # You can set a command specific environment and cwd:
+            #
+            #   run("echo 1", :cwd => "/tmp", :environment => {"FOO" => "BAR"})
+            #
+            # This will run 'echo 1' from /tmp with FOO=BAR in addition to a setting forcing
+            # LC_ALL = C.  To prevent LC_ALL from being set either set it specifically or:
+            #
+            #   run("echo 1", :cwd => "/tmp", :environment => nil)
             #
             # Exceptions here will be handled by the usual agent exception handler or any
             # specific one you create, if you dont it will just fall through and be sent
             # to the client
             def run(command, options={})
                 shellopts = {}
-
-                @shell_stdout = nil
-                @shell_stderr = nil
-                @shell_status = nil
 
                 # force stderr and stdout to be strings as the library
                 # will append data to them if given using the << method.
@@ -192,11 +199,7 @@ module MCollective
 
                 shell.runcommand
 
-                @shell_stdout = shell.stdout
-                @shell_stderr = shell.stderr
-                @shell_status = shell.status
-
-                shell.stdout
+                shell.status.exitstatus
             end
 
             # Registers meta data for the introspection hash
