@@ -138,6 +138,13 @@ module MCollective
 
 
             private
+            # Runs a command via the MC::Shell wrapper, options are as per MC::Shell
+            def run(command, options)
+                shell = Shell.new(command, options)
+                shell.runcommand
+                [shell.stdout, shell.stderr, shell.status]
+            end
+
             # Registers meta data for the introspection hash
             def self.metadata(data)
                 [:name, :description, :author, :license, :version, :url, :timeout].each do |arg|
@@ -156,7 +163,7 @@ module MCollective
                 }
             end
 
-            # Creates a new action wit the block passed and sets some defaults
+            # Creates a new action with the block passed and sets some defaults
             #
             # action "status" do
             #    # logic here to restart service
