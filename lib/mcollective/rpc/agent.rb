@@ -139,7 +139,16 @@ module MCollective
 
             private
             # Runs a command via the MC::Shell wrapper, options are as per MC::Shell
-            def run(command, options)
+            def run(command, options={})
+                # force stderr and stdout to be strings
+                # as the library will append data to them if
+                # given using the << method
+                [:stderr, :stdout].each do |k|
+                    if options.include?(k)
+                        options[k] = "" if options[k].nil?
+                    end
+                end
+
                 shell = Shell.new(command, options)
                 shell.runcommand
                 [shell.stdout, shell.stderr, shell.status]
