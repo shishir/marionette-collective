@@ -76,6 +76,7 @@ module MCollective
                 begin
                     Process::waitpid(cid)
                 rescue SystemExit
+                rescue Errno::ECHILD
                 rescue Exception => e
                     Log.info("Unexpected exception received while waiting for child process: #{e.class}: #{e}")
                 end

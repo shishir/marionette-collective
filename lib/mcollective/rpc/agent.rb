@@ -29,7 +29,7 @@ module MCollective
         # We also currently have the validation code in here, this will be moved to plugins soon.
         class Agent
             attr_accessor :meta, :reply, :request
-            attr_reader :logger, :config, :timeout, :ddl
+            attr_reader :logger, :config, :timeout, :ddl, :shell_status, :shell_stderr, :shell_stdout
 
             def initialize
                 # Default meta data unset
@@ -45,6 +45,9 @@ module MCollective
                 @logger = Log.instance
                 @config = Config.instance
                 @agent_name = self.class.to_s.split("::").last.downcase
+                @shell_status = nil
+                @shell_stderr = nil
+                @shell_stdout = nil
 
                 # Loads the DDL so we can later use it for validation
                 # and help generation
@@ -139,19 +142,61 @@ module MCollective
 
             private
             # Runs a command via the MC::Shell wrapper, options are as per MC::Shell
+            #
+            # To set reply[:foo] based on stdout do:
+            #
+            #   run("echo 1", :stdout => :foo)
+            #
+            # The same pattern applies to stderr.
+            #
+            # After any shell command is run shell_stdout, shell_stderr and shell_status
+            # is set, the stdout is returned.
+            #
+            # Exceptions here will be handled by the usual agent exception handler or any
+            # specific one you create, if you dont it will just fall through and be sent
+            # to the client
             def run(command, options={})
-                # force stderr and stdout to be strings
-                # as the library will append data to them if
-                # given using the << method
+                shellopts = {}
+
+                @shell_stdout = nil
+                @shell_stderr = nil
+                @shell_status = nil
+
+                # force stderr and stdout to be strings as the library
+                # will append data to them if given using the << method.
+                #
+                # if the data pased to :stderr or :stdin is a Symbol
+                # add that into the reply hash with that Symbol
                 [:stderr, :stdout].each do |k|
                     if options.include?(k)
-                        options[k] = "" if options[k].nil?
+                        if options[k].is_a?(Symbol)
+                            reply[ options[k] ] = ""
+                            shellopts[k] = reply[ options[k] ]
+                        else
+                            if options[k].respond_to?("<<")
+                                shellopts[k] = options[k]
+                            else
+                                reply.fail! "#{k} should support << while calling run(#{command})"
+                            end
+                        end
                     end
                 end
 
-                shell = Shell.new(command, options)
+                [:stdin, :cwd, :environment].each do |k|
+                    if options.include?(k)
+                        shellopts[k] = options[k]
+                    end
+                end
+
+                shell = Shell.new(command, shellopts)
+
                 shell.runcommand
-                [shell.stdout, shell.stderr, shell.status]
+
+                @shell_stdout = shell.stdout
+                @shell_stderr = shell.stderr
+                @shell_status = shell.status
+
+                shell.stdout
             end
 
             # Registers meta data for the introspection hash
