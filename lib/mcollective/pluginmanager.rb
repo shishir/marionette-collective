@@ -23,11 +23,11 @@ module MCollective
         # If we were to do a .new here the Class initialize method would get called and not
         # the plugins, we there for only initialize the classes when they get requested via []
         def self.<<(plugin)
-            plugin[:single_intance] = true unless plugin.include?(:single_intance)
+            plugin[:single_instance] = true unless plugin.include?(:single_instance)
 
             type = plugin[:type]
             klass = plugin[:class]
-            single = plugin[:single_intance]
+            single = plugin[:single_instance]
 
             raise("Plugin #{type} already loaded") if @plugins.include?(type)
 
@@ -36,10 +36,10 @@ module MCollective
             # create the class later on demand.
             if klass.is_a?(String)
                 @plugins[type] = {:loadtime => Time.now, :class => klass, :instance => nil, :single => single}
-                Log.debug("Registering plugin #{type} with class #{klass}")
+                Log.debug("Registering plugin #{type} with class #{klass} single_instance: #{single}")
             else
                 @plugins[type] = {:loadtime => Time.now, :class => klass.class, :instance => klass, :single => true}
-                Log.debug("Registering plugin #{type} with class #{klass.class}")
+                Log.debug("Registering plugin #{type} with class #{klass.class} single_instance: true")
             end
         end
 
@@ -64,16 +64,18 @@ module MCollective
 
             klass = @plugins[plugin][:class]
 
-            if @plugin[plugin][:single]
+            if @plugins[plugin][:single]
                 # Create an instance of the class if one hasn't been done before
                 if @plugins[plugin][:instance] == nil
+                    Log.debug("Returning new plugin #{plugin} with class #{klass}")
                     @plugins[plugin][:instance] = create_instance(klass)
+                else
+                    Log.debug("Returning cached plugin #{plugin} with class #{klass}")
                 end
-
-                Log.debug("Returning plugin #{plugin} with class #{klass}")
 
                 @plugins[plugin][:instance]
             else
+                Log.debug("Returning new plugin #{plugin} with class #{klass}")
                 create_instance(klass)
             end
         end
