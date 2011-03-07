@@ -35,7 +35,7 @@ module MCollective
             # If we get a string then store 'nil' as the instance, signalling that we'll
             # create the class later on demand.
             if klass.is_a?(String)
-                @plugins[type] = {:loadtime => Time.now, :class => klass, :instance => nil, :single = single}
+                @plugins[type] = {:loadtime => Time.now, :class => klass, :instance => nil, :single => single}
                 Log.debug("Registering plugin #{type} with class #{klass}")
             else
                 @plugins[type] = {:loadtime => Time.now, :class => klass.class, :instance => klass, :single => true}
