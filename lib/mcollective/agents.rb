@@ -44,7 +44,7 @@ module MCollective
 
             begin
                 PluginManager.loadclass(classname)
-                PluginManager << {:type => "#{agentname}_agent", :class => classname, :single_intance => false}
+                PluginManager << {:type => "#{agentname}_agent", :class => classname, :single_instance => false}
 
                 Util.subscribe(Util.make_target(agentname, :command)) unless @@agents.include?(agentname)
 
