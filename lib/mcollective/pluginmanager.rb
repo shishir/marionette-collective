@@ -23,8 +23,11 @@ module MCollective
         # If we were to do a .new here the Class initialize method would get called and not
         # the plugins, we there for only initialize the classes when they get requested via []
         def self.<<(plugin)
+            plugin[:single_intance] = true unless plugin.include?(:single_intance)
+
             type = plugin[:type]
             klass = plugin[:class]
+            single = plugin[:single_intance]
 
             raise("Plugin #{type} already loaded") if @plugins.include?(type)
 
@@ -32,10 +35,10 @@ module MCollective
             # If we get a string then store 'nil' as the instance, signalling that we'll
             # create the class later on demand.
             if klass.is_a?(String)
-                @plugins[type] = {:loadtime => Time.now, :class => klass, :instance => nil}
+                @plugins[type] = {:loadtime => Time.now, :class => klass, :instance => nil, :single = single}
                 Log.debug("Registering plugin #{type} with class #{klass}")
             else
-                @plugins[type] = {:loadtime => Time.now, :class => klass.class, :instance => klass}
+                @plugins[type] = {:loadtime => Time.now, :class => klass.class, :instance => klass, :single => true}
                 Log.debug("Registering plugin #{type} with class #{klass.class}")
             end
         end
@@ -61,18 +64,27 @@ module MCollective
 
             klass = @plugins[plugin][:class]
 
-            # Create an instance of the class if one hasn't been done before
-            if @plugins[plugin][:instance] == nil
-                begin
-                    @plugins[plugin][:instance] = eval("#{klass}.new")
-                rescue Exception => e
-                    raise("Could not create instance of plugin #{plugin}: #{e}")
+            if @plugin[plugin][:single]
+                # Create an instance of the class if one hasn't been done before
+                if @plugins[plugin][:instance] == nil
+                    @plugins[plugin][:instance] = create_instance(klass)
                 end
+
+                Log.debug("Returning plugin #{plugin} with class #{klass}")
+
+                @plugins[plugin][:instance]
+            else
+                create_instance(klass)
             end
+        end
 
-            Log.debug("Returning plugin #{plugin} with class #{klass}")
-
-            @plugins[plugin][:instance]
+        # use eval to create an instance of a class
+        def self.create_instance(klass)
+            begin
+                eval("#{klass}.new")
+            rescue Exception => e
+                raise("Could not create instance of plugin #{klass}: #{e}")
+            end
         end
 
         # Loads a class from file by doing some simple search/replace
