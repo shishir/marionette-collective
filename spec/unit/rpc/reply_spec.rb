@@ -44,7 +44,7 @@ module MCollective
                 it "should set statusmsg" do
                     expect {
                         @reply.fail! "foo"
-                    }.to raise_error RPCAborted, "foo"
+                    }.to raise_error(RPCAborted, "foo")
 
                     @reply.statusmsg.should == "foo"
                 end
@@ -52,13 +52,13 @@ module MCollective
                 it "should set statuscode to 1 by default" do
                     expect {
                         @reply.fail! "foo"
-                    }.to raise_error RPCAborted
+                    }.to raise_error(RPCAborted)
                 end
 
                 it "should set statuscode" do
                     expect {
                         @reply.fail! "foo", 2
-                    }.to raise_error UnknownRPCAction
+                    }.to raise_error(UnknownRPCAction)
 
                     @reply.statuscode.should == 2
                 end
@@ -66,35 +66,35 @@ module MCollective
                 it "should raise RPCAborted for code 1" do
                     expect {
                         @reply.fail! "foo", 1
-                    }.to raise_error RPCAborted
+                    }.to raise_error(RPCAborted)
                 end
 
                 it "should raise UnknownRPCAction for code 2" do
                     expect {
                         @reply.fail! "foo", 2
-                    }.to raise_error UnknownRPCAction
+                    }.to raise_error(UnknownRPCAction)
                 end
 
                 it "should raise MissingRPCData for code 3" do
                     expect {
                         @reply.fail! "foo", 3
-                    }.to raise_error MissingRPCData
+                    }.to raise_error(MissingRPCData)
                 end
 
                 it "should raise InvalidRPCData for code 4" do
                     expect {
                         @reply.fail! "foo", 4
-                    }.to raise_error InvalidRPCData
+                    }.to raise_error(InvalidRPCData)
                 end
 
                 it "should raise UnknownRPCError for all other codes" do
                     expect {
                         @reply.fail! "foo", 5
-                    }.to raise_error UnknownRPCError
+                    }.to raise_error(UnknownRPCError)
 
                     expect {
                         @reply.fail! "foo", "x"
-                    }.to raise_error UnknownRPCError
+                    }.to raise_error(UnknownRPCError)
                 end
             end
 
