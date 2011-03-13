@@ -43,8 +43,10 @@ module MCollective
             PluginManager.delete("#{agentname}_agent")
 
             begin
+                single_instance = agentname == "registration"
+
                 PluginManager.loadclass(classname)
-                PluginManager << {:type => "#{agentname}_agent", :class => classname}
+                PluginManager << {:type => "#{agentname}_agent", :class => classname, :single_instance => single_instance}
 
                 Util.subscribe(Util.make_target(agentname, :command)) unless @@agents.include?(agentname)
 
