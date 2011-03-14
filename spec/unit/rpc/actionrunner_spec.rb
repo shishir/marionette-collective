@@ -1,0 +1,118 @@
+#!/usr/bin/env ruby
+
+require File.dirname(__FILE__) + '/../../spec_helper'
+
+module MCollective
+    module RPC
+        describe ActionRunner do
+            before(:each) do
+                @req = mock
+                @req.expects(:agent).returns("spectester")
+                @req.expects(:action).returns("tester")
+
+                @runner = ActionRunner.new("/bin/echo 1", @req, :json)
+            end
+
+            describe "#initialize" do
+                it "should set command" do
+                    @runner.command.should == "/bin/echo 1"
+                end
+
+                it "should set agent" do
+                    @runner.agent.should == "spectester"
+                end
+
+                it "should set action" do
+                    @runner.action.should == "tester"
+                end
+
+                it "should set format" do
+                    @runner.format.should == :json
+                end
+
+                it "should set request" do
+                    @runner.request.should == @req
+                end
+
+                it "should set stdout" do
+                    @runner.stdout.should == ""
+                end
+
+                it "should set stderr" do
+                    @runner.stderr.should == ""
+                end
+            end
+
+            describe "#shell" do
+                it "should create a shell instance with correct settings" do
+                    s = @runner.shell("test", "infile", "outfile")
+
+                    s.command.should == "test infile outfile"
+                    s.cwd.should == "/tmp"
+                    s.stdout.should == ""
+                    s.stderr.should == ""
+                    s.environment["MCOLLECTIVE_REQUEST_FILE"].should == "infile"
+                    s.environment["MCOLLECTIVE_REPLY_FILE"].should == "outfile"
+                end
+            end
+
+            describe "#load_results" do
+                it "should load data from a file" do
+                    Tempfile.open("mcollective_test", "/tmp") do |f|
+                        f.puts '{"foo":"bar","bar":"baz"}'
+                        f.close
+
+                        @runner.load_results(f.path).should == {:foo => "bar", :bar => "baz"}
+                    end
+                end
+
+                it "should set all keys to Symbol" do
+                    data = {"foo" => "bar", "bar" => "baz"}
+                    Tempfile.open("mcollective_test", "/tmp") do |f|
+                        f.puts data.to_json
+                        f.close
+
+                        @runner.load_results(f.path).keys.each do |k|
+                            k.class.should == Symbol
+                        end
+                    end
+                end
+            end
+
+            describe "#saverequest" do
+                it "should save to a temp file" do
+                    @req.expects(:to_json).returns({:foo => "bar"}.to_json)
+                    fname = @runner.saverequest(@req).path
+
+                    JSON.load(File.read(fname)).should == {"foo" => "bar"}
+                end
+            end
+
+            describe "#canrun?" do
+                it "should correctly report executables" do
+                    @runner.canrun?("/bin/true").should == true
+                end
+
+                it "should detect missing files" do
+                    @runner.canrun?("/nonexisting").should == false
+                end
+            end
+
+            describe "#to_s" do
+                it "should return correct data" do
+                    @runner.to_s.should == "spectester#tester command: /bin/echo 1"
+                end
+            end
+
+            describe "#tempfile" do
+                it "should return a TempFile" do
+                    @runner.tempfile("foo").class.should == Tempfile
+                end
+
+                it "should contain the prefix in its name" do
+                    @runner.tempfile("foo").path.should match(/foo/)
+                end
+            end
+        end
+    end
+end
