@@ -57,22 +57,34 @@ module MCollective
             end
 
             describe "#load_results" do
+                it "should call the correct format loader" do
+                    req = mock
+                    req.expects(:agent).returns("spectester")
+                    req.expects(:action).returns("tester")
+
+                    runner = ActionRunner.new("/bin/echo 1", req, :foo)
+                    runner.expects("load_foo_results").returns({:foo => :bar})
+                    runner.load_results("/dev/null").should == {:foo => :bar}
+                end
+            end
+
+            describe "#load_json_results" do
                 it "should load data from a file" do
                     Tempfile.open("mcollective_test", "/tmp") do |f|
                         f.puts '{"foo":"bar","bar":"baz"}'
                         f.close
 
-                        @runner.load_results(f.path).should == {:foo => "bar", :bar => "baz"}
+                        @runner.load_json_results(f.path).should == {:foo => "bar", :bar => "baz"}
                     end
 
                 end
 
                 it "should return empty data on JSON parse error" do
-                    @runner.load_results("/dev/null").should == {}
+                    @runner.load_json_results("/dev/null").should == {}
                 end
 
                 it "should return empty data for missing files" do
-                    @runner.load_results("/nonexisting").should == {}
+                    @runner.load_json_results("/nonexisting").should == {}
                 end
 
                 it "should load complex data correctly" do
@@ -81,7 +93,7 @@ module MCollective
                         f.puts data.to_json
                         f.close
 
-                        @runner.load_results(f.path).should == data
+                        @runner.load_json_results(f.path).should == data
                     end
                 end
 
@@ -91,7 +103,7 @@ module MCollective
                         f.puts data.to_json
                         f.close
 
-                        @runner.load_results(f.path).keys.each do |k|
+                        @runner.load_json_results(f.path).keys.each do |k|
                             k.class.should == Symbol
                         end
                     end
@@ -99,6 +111,19 @@ module MCollective
             end
 
             describe "#saverequest" do
+                it "should call the correct format saver" do
+                    req = mock
+                    req.expects(:agent).returns("spectester")
+                    req.expects(:action).returns("tester")
+
+                    runner = ActionRunner.new("/bin/echo 1", req, :foo)
+
+                    runner.expects("save_foo_request").with("test").returns("/some/file")
+                    runner.saverequest("test").should == "/some/file"
+                end
+            end
+
+            describe "#save_json_request" do
                 it "should save to a temp file" do
                     @req.expects(:to_json).returns({:foo => "bar"}.to_json)
                     fname = @runner.saverequest(@req).path

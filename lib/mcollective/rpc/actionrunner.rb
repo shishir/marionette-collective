@@ -1,5 +1,25 @@
 module MCollective
     module RPC
+        # A helper used by RPC::Agent#implemented_by to delegate an action to
+        # an external script.  At present only JSON based serialization is
+        # supported in future ones based on key=val pairs etc will be added
+        #
+        # It serializes the request object into an input file and creates an
+        # empty output file.  It then calls the external command reading the
+        # output file at the end.
+        #
+        # any STDERR gets logged at error level and any STDOUT gets logged at
+        # info level.
+        #
+        # It will interpret the exit code from the application the same way
+        # RPC::Reply#fail! and #fail handles their codes creating a consistent
+        # interface, the message part of the fail message will come from STDERR
+        #
+        # Generally externals should just exit with code 1 on failure and print to
+        # STDERR, this is exactly what Perl die() does and translates perfectly
+        # to our model
+        #
+        # It uses the MCollective::Shell wrapper to call the external application
         class ActionRunner
             attr_reader :command, :agent, :action, :format, :stdout, :stderr, :request
 
@@ -51,6 +71,16 @@ module MCollective
             end
 
             def load_results(file)
+                Log.debug("Attempting to load results in #{format} format from #{file}")
+
+                if respond_to?("load_#{format}_results")
+                    send("load_#{format}_results", file)
+                end
+            rescue Exception
+                {}
+            end
+
+            def load_json_results(file)
                 return {} unless File.readable?(file)
 
                 data = JSON.load(File.read(file))
@@ -66,6 +96,14 @@ module MCollective
             end
 
             def saverequest(req)
+                Log.debug("Attempting to save request in #{format} format")
+
+                if respond_to?("save_#{format}_request")
+                    send("save_#{format}_request", req)
+                end
+            end
+
+            def save_json_request(req)
                 request_file = tempfile("request")
                 request_file.puts req.to_json
                 request_file.close
