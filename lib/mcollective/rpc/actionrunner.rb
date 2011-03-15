@@ -16,7 +16,7 @@ module MCollective
             def run
                 unless canrun?(command)
                     Log.warn("Cannot run #{to_s}")
-                    reply.fail! "Cannot execute #{to_s}"
+                    raise RPCAborted, "Cannot execute #{to_s}"
                 end
 
                 Log.debug("Running #{to_s}")
@@ -51,6 +51,8 @@ module MCollective
             end
 
             def load_results(file)
+                return {} unless File.readable?(file)
+
                 data = JSON.load(File.read(file))
                 reply = {}
 
@@ -59,6 +61,8 @@ module MCollective
                 end
 
                 reply
+            rescue JSON::ParserError
+                {}
             end
 
             def saverequest(req)

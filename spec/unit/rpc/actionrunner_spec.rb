@@ -64,6 +64,25 @@ module MCollective
 
                         @runner.load_results(f.path).should == {:foo => "bar", :bar => "baz"}
                     end
+
+                end
+
+                it "should return empty data on JSON parse error" do
+                    @runner.load_results("/dev/null").should == {}
+                end
+
+                it "should return empty data for missing files" do
+                    @runner.load_results("/nonexisting").should == {}
+                end
+
+                it "should load complex data correctly" do
+                    data = {:foo => "bar", :bar => {"one" => "two"}}
+                    Tempfile.open("mcollective_test", "/tmp") do |f|
+                        f.puts data.to_json
+                        f.close
+
+                        @runner.load_results(f.path).should == data
+                    end
                 end
 
                 it "should set all keys to Symbol" do
