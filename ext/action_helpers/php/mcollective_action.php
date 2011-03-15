@@ -1,5 +1,5 @@
 <?php
-class MCollectiveAgent {
+class MCollectiveAction {
     public $infile = "";
     public $outfile = "";
     public $request = array();

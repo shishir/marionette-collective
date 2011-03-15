@@ -17,7 +17,7 @@ replying with _message_ and _timestamp_
 &lt;?php
     require("mcollective_agent.php");
 
-    $mc = new MCollectiveAgent();
+    $mc = new MCollectiveAction();
     $mc->message = $mc->data["message"];
     $mc->timestamp = strftime("%c");
     $mc->info("some text to info log on the server");
