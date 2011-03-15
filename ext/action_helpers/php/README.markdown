@@ -15,7 +15,7 @@ replying with _message_ and _timestamp_
 
 <pre>
 &lt;?php
-    require("mcollective_agent.php");
+    require("mcollective_action.php");
 
     $mc = new MCollectiveAction();
     $mc->message = $mc->data["message"];
