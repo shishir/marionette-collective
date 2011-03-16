@@ -73,24 +73,25 @@ module MCollective
             def load_results(file)
                 Log.debug("Attempting to load results in #{format} format from #{file}")
 
+                data = {}
+
                 if respond_to?("load_#{format}_results")
-                    send("load_#{format}_results", file)
+                    tempdata = send("load_#{format}_results", file)
+
+                    tempdata.each_pair do |k,v|
+                        data[k.to_sym] = v
+                    end
                 end
-            rescue Exception
+
+                data
+            rescue Exception => e
                 {}
             end
 
             def load_json_results(file)
                 return {} unless File.readable?(file)
 
-                data = JSON.load(File.read(file))
-                reply = {}
-
-                data.each_pair do |k,v|
-                    reply[k.to_sym] = v
-                end
-
-                reply
+                JSON.load(File.read(file))
             rescue JSON::ParserError
                 {}
             end
@@ -99,16 +100,18 @@ module MCollective
                 Log.debug("Attempting to save request in #{format} format")
 
                 if respond_to?("save_#{format}_request")
-                    send("save_#{format}_request", req)
+                    data = send("save_#{format}_request", req)
+
+                    request_file = tempfile("request")
+                    request_file.puts data
+                    request_file.close
                 end
+
+                request_file
             end
 
             def save_json_request(req)
-                request_file = tempfile("request")
-                request_file.puts req.to_json
-                request_file.close
-
-                request_file
+                req.to_json
             end
 
             def canrun?(command)

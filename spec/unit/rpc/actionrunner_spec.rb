@@ -66,6 +66,17 @@ module MCollective
                     runner.expects("load_foo_results").returns({:foo => :bar})
                     runner.load_results("/dev/null").should == {:foo => :bar}
                 end
+
+                it "should set all keys to Symbol" do
+                    data = {"foo" => "bar", "bar" => "baz"}
+                    Tempfile.open("mcollective_test", "/tmp") do |f|
+                        f.puts data.to_json
+                        f.close
+
+                        results = @runner.load_results(f.path)
+                        results.should == {:foo => "bar", :bar => "baz"}
+                    end
+                end
             end
 
             describe "#load_json_results" do
@@ -74,7 +85,7 @@ module MCollective
                         f.puts '{"foo":"bar","bar":"baz"}'
                         f.close
 
-                        @runner.load_json_results(f.path).should == {:foo => "bar", :bar => "baz"}
+                        @runner.load_json_results(f.path).should == {"foo" => "bar", "bar" => "baz"}
                     end
 
                 end
@@ -88,7 +99,7 @@ module MCollective
                 end
 
                 it "should load complex data correctly" do
-                    data = {:foo => "bar", :bar => {"one" => "two"}}
+                    data = {"foo" => "bar", "bar" => {"one" => "two"}}
                     Tempfile.open("mcollective_test", "/tmp") do |f|
                         f.puts data.to_json
                         f.close
@@ -97,38 +108,34 @@ module MCollective
                     end
                 end
 
-                it "should set all keys to Symbol" do
-                    data = {"foo" => "bar", "bar" => "baz"}
-                    Tempfile.open("mcollective_test", "/tmp") do |f|
-                        f.puts data.to_json
-                        f.close
-
-                        @runner.load_json_results(f.path).keys.each do |k|
-                            k.class.should == Symbol
-                        end
-                    end
-                end
             end
 
             describe "#saverequest" do
-                it "should call the correct format saver" do
+                it "should call the correct format serializer" do
                     req = mock
                     req.expects(:agent).returns("spectester")
                     req.expects(:action).returns("tester")
 
                     runner = ActionRunner.new("/bin/echo 1", req, :foo)
 
-                    runner.expects("save_foo_request").with("test").returns("/some/file")
-                    runner.saverequest("test").should == "/some/file"
-                end
-            end
+                    runner.expects("save_foo_request").with(req).returns('{"foo":"bar"}')
 
-            describe "#save_json_request" do
+                    runner.saverequest(req)
+                end
+
                 it "should save to a temp file" do
                     @req.expects(:to_json).returns({:foo => "bar"}.to_json)
                     fname = @runner.saverequest(@req).path
 
                     JSON.load(File.read(fname)).should == {"foo" => "bar"}
+                    File.dirname(fname).should == "/tmp"
+                end
+            end
+
+            describe "#save_json_request" do
+                it "should return correct json data" do
+                    @req.expects(:to_json).returns({:foo => "bar"}.to_json)
+                    @runner.save_json_request(@req).should == '{"foo":"bar"}'
                 end
             end
 
