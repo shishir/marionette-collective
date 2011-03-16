@@ -51,8 +51,8 @@ module MCollective
 
                 Log.debug("#{command} exited with #{runner.status.exitstatus}")
 
-                stderr.each_line {|l| Log.error("#{to_s}: #{l}")} unless stderr.empty?
-                stdout.each_line {|l| Log.info("#{to_s}: #{l}")} unless stdout.empty?
+                stderr.each_line {|l| Log.error("#{to_s}: #{l.chomp}")} unless stderr.empty?
+                stdout.each_line {|l| Log.info("#{to_s}: #{l.chomp}")} unless stdout.empty?
 
                 {:exitstatus => runner.status.exitstatus,
                  :stdout     => runner.stdout,
