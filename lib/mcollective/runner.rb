@@ -99,12 +99,12 @@ module MCollective
         def agentmsg(msg, target, collective)
             @agents.dispatch(msg.payload, target, @connection) do |replies|
                 if msg.reply_to
-                    dest = reply_to
+                    dest = msg.reply_to
                 else
                     dest = Util.make_target(target, :reply, collective)
                 end
 
-                reply(target, dest, replies, msg[:requestid], msg[:callerid]) unless replies == nil
+                reply(target, dest, replies, msg.payload[:requestid], msg.payload[:callerid]) unless replies == nil
             end
         end
 

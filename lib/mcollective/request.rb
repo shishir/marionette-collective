@@ -13,7 +13,6 @@ module MCollective
             @headers = headers
 
             @reply_to = nil
-            @body = nil
         end
     end
 end

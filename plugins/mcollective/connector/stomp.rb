@@ -136,6 +136,8 @@ module MCollective
                     request.reply_to = msg.headers["reply-to"]
                     Log.debug("Setting reply to #{request.reply_to} based on STOMP headers")
                 end
+
+                return request
             end
 
             # Sends a message to the Stomp connection
