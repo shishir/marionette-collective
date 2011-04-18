@@ -46,16 +46,17 @@ module MCollective
 
             Log.debug("Sending request #{reqid} to #{target}")
 
-            unless @subscriptions.include?(agent)
-                topic = Util.make_target(agent, :reply, collective)
-                Log.debug("Subscribing to #{topic}")
+            reply_topic = PluginManager["connector_plugin"].temp_target(agent, :reply, collective)
 
-                Util.subscribe(topic)
+            unless @subscriptions.include?(agent)
+                Log.debug("Subscribing to #{reply_topic}")
+
+                Util.subscribe(reply_topic)
                 @subscriptions[agent] = 1
             end
 
             Timeout.timeout(2) do
-                @connection.send(target, req)
+                @connection.send(target, req, reply_topic)
             end
 
             reqid

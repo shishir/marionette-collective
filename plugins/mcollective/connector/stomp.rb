@@ -141,16 +141,19 @@ module MCollective
             end
 
             # Sends a message to the Stomp connection
-            def send(target, msg)
+            def send(target, msg, reply_to=nil)
                 Log.debug("Sending a message to Stomp target '#{target}'")
 
                 msg = SSL.base64_encode(msg) if @base64
 
+                reply_to ? headers = {"reply-to" => reply_to} : headers = {}
+                require 'pp';Log.debug("Sending with headers: #{headers.pretty_inspect}")
+
                 # deal with deprecation warnings in newer stomp gems
                 if @connection.respond_to?("publish")
-                    @connection.publish(target, msg)
+                    @connection.publish(target, msg, headers)
                 else
-                    @connection.send(target, msg)
+                    @connection.send(target, msg, headers)
                 end
             end
 
@@ -160,6 +163,15 @@ module MCollective
                     Log.debug("Subscribing to #{source}")
                     @connection.subscribe(source)
                     @subscriptions << source
+                end
+            end
+
+            # Use ActiveMQ temp-topic semantics
+            def temp_target(agent, type, collective)
+                if get_bool_option("stomp.activemq_temp_topics", false)
+                    "/temp-topic/#{collective}.#{agent}.#{type}"
+                else
+                    super
                 end
             end
 

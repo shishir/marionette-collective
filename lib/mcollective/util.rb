@@ -168,7 +168,11 @@ module MCollective
             else
                 raise("Unknown collective '#{collective}' known collectives are '#{config.collectives.join ', '}'") unless config.collectives.include?(collective)
 
-                ["#{config.topicprefix}#{collective}", agent, type].join(config.topicsep)
+                if type == :reply
+                    PluginManager["connector_plugin"].temp_target(agent, type, collective)
+                else
+                    ["#{config.topicprefix}#{collective}", agent, type].join(config.topicsep)
+                end
             end
         end
 
