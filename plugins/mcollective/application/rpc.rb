@@ -10,6 +10,11 @@ class MCollective::Application::Rpc<MCollective::Application
         :default        => false,
         :type           => :bool
 
+
+    option :reply_to,
+        :description    => "Send reply to a custom destination",
+        :arguments      => ["--reply-to [DEST]"]
+
     option :agent,
         :description    => "Agent to call",
         :arguments      => ["-a", "--agent AGENT"]
@@ -47,6 +52,12 @@ class MCollective::Application::Rpc<MCollective::Application
                 STDERR.puts("No agent, action and arguments specified")
                 exit!
             end
+        end
+
+        # If reply_to was given that should imply --no-response since we wont get
+        # the response
+        if configuration.include?(:reply_to)
+            configuration[:no_results] = true
         end
 
         # convert arguments to symbols for keys to comply with simplerpc conventions
@@ -88,6 +99,8 @@ class MCollective::Application::Rpc<MCollective::Application
 
             mc = rpcclient(configuration[:agent])
 
+            mc.reply_to configuration[:reply_to] if configuration.include?(:reply_to)
+
             booleanish_to_boolean(configuration[:arguments], mc.ddl.action_interface(configuration[:action])) unless mc.ddl.nil?
 
             mc.agent_filter(configuration[:agent])
@@ -95,7 +108,6 @@ class MCollective::Application::Rpc<MCollective::Application
             puts "Request sent with id: " + mc.send(configuration[:action], configuration[:arguments])
         else
             mc = rpcclient(configuration[:agent])
-
             booleanish_to_boolean(configuration[:arguments], mc.ddl.action_interface(configuration[:action])) unless mc.ddl.nil?
 
             mc.agent_filter(configuration[:agent])

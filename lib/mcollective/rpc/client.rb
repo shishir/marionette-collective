@@ -302,6 +302,11 @@ module MCollective
                 reset
             end
 
+            # sets the reply_to destination
+            def reply_to(dest)
+                @client.options[:reply_to] = dest
+            end
+
             # Resets various internal parts of the class, most importantly it clears
             # out the cached discovery
             def reset

@@ -40,20 +40,25 @@ module MCollective
         def sendreq(msg, agent, filter = {})
             target = Util.make_target(agent, :command, collective)
 
+            if options.include?(:reply_to)
+                reply_topic = options[:reply_to]
+                msg[:reply_to] = reply_topic
+            else
+                reply_topic = PluginManager["connector_plugin"].temp_target(agent, :reply, collective)
+
+                unless @subscriptions.include?(agent)
+                    Log.debug("Subscribing to #{reply_topic}")
+
+                    Util.subscribe(reply_topic)
+                    @subscriptions[agent] = 1
+                end
+            end
+
             reqid = Digest::MD5.hexdigest("#{@config.identity}-#{Time.now.to_f.to_s}-#{target}")
 
             req = @security.encoderequest(@config.identity, target, msg, reqid, filter)
 
             Log.debug("Sending request #{reqid} to #{target}")
-
-            reply_topic = PluginManager["connector_plugin"].temp_target(agent, :reply, collective)
-
-            unless @subscriptions.include?(agent)
-                Log.debug("Subscribing to #{reply_topic}")
-
-                Util.subscribe(reply_topic)
-                @subscriptions[agent] = 1
-            end
 
             Timeout.timeout(2) do
                 @connection.send(target, req, reply_topic)

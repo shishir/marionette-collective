@@ -147,7 +147,6 @@ module MCollective
                 msg = SSL.base64_encode(msg) if @base64
 
                 reply_to ? headers = {"reply-to" => reply_to} : headers = {}
-                require 'pp';Log.debug("Sending with headers: #{headers.pretty_inspect}")
 
                 # deal with deprecation warnings in newer stomp gems
                 if @connection.respond_to?("publish")
