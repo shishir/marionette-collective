@@ -126,13 +126,15 @@ module MCollective
                 Log.debug("Waiting for a message from Stomp")
                 msg = @connection.receive
 
-                # STOMP puts the payload in the body variable, pass that
-                # into the payload of MCollective::Request and discard all the
-                # other headers etc that stomp provides
                 if @base64
-                    Request.new(SSL.base64_decode(msg.body))
+                    request = Request.new(SSL.base64_decode(msg.body), msg.headers)
                 else
-                    Request.new(msg.body)
+                    request = Request.new(msg.body, msg.headers)
+                end
+
+                if msg.headers.include?("reply-to")
+                    request.reply_to = msg.headers["reply-to"]
+                    Log.debug("Setting reply to #{request.reply_to} based on STOMP headers")
                 end
             end
 

@@ -57,7 +57,8 @@ module MCollective
             loop do
                 begin
                     msg = receive
-                    dest = msg[:msgtarget]
+                    payload = msg.payload
+                    dest = payload[:msgtarget]
 
                     sep = Regexp.escape(@config.topicsep)
                     prefix = Regexp.escape(@config.topicprefix)
@@ -96,8 +97,13 @@ module MCollective
         private
         # Deals with messages directed to agents
         def agentmsg(msg, target, collective)
-            @agents.dispatch(msg, target, @connection) do |replies|
-                dest = Util.make_target(target, :reply, collective)
+            @agents.dispatch(msg.payload, target, @connection) do |replies|
+                if msg.reply_to
+                    dest = reply_to
+                else
+                    dest = Util.make_target(target, :reply, collective)
+                end
+
                 reply(target, dest, replies, msg[:requestid], msg[:callerid]) unless replies == nil
             end
         end
@@ -105,11 +111,16 @@ module MCollective
         # Deals with messages sent to our control topic
         def controlmsg(msg, collective)
             begin
-                body = msg[:body]
-                requestid = msg[:requestid]
-                callerid = msg[:callerid]
+                payload = msg.payload
+                body = payload[:body]
+                requestid = payload[:requestid]
+                callerid = payload[:callerid]
 
-                replytopic = Util.make_target("mcollective", :reply, collective)
+                if msg.reply_topic
+                    replytopic = msg.reply_topic
+                else
+                    replytopic = Util.make_target("mcollective", :reply, collective)
+                end
 
                 case body
                     when /^stats$/
@@ -136,11 +147,18 @@ module MCollective
 
             @stats.received
 
-            msg = @security.decodemsg(msg)
+            msg.payload = @security.decodemsg(msg)
 
-            raise(NotTargettedAtUs, "Received message is not targetted to us")  unless @security.validate_filter?(msg[:filter])
+            raise(NotTargettedAtUs, "Received message is not targetted to us")  unless @security.validate_filter?(msg.payload[:filter])
 
-            msg
+            # If the body sets a specific reply to header we
+            # use that and we override whatever the middleware
+            # would have set in the reply-to headers
+            if msg.payload.include?(:reply_to)
+                msg.reply_to = msg.payload[:reply_to]
+            end
+
+            return msg
         end
 
         # Sends a reply to a specific target topic

@@ -5,10 +5,15 @@ module MCollective
     # do not rely on any headers, special data formats etc as produced by the
     # middleware, using this abstraction means we can enforce that
     class Request
-        attr_reader :payload
+        attr_reader :headers
+        attr_accessor :reply_to, :payload
 
-        def initialize(payload)
+        def initialize(payload, headers={})
             @payload = payload
+            @headers = headers
+
+            @reply_to = nil
+            @body = nil
         end
     end
 end
