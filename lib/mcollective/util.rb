@@ -161,7 +161,10 @@ module MCollective
 
             raise("Unknown target type #{type}") unless [:command, :reply, :queue].include?(type)
 
-            queued ? prefix = config.queueprefix : prefix = config.topicprefix
+            prefix = config.topicprefix
+            prefix = config.queueprefix if queued
+
+            Log.debug("Creating a target for prefix #{prefix}")
 
             if collective.nil?
                 config.collectives.map do |c|

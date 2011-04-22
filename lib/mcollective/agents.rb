@@ -39,19 +39,19 @@ module MCollective
             agentfile = findagentfile(agentname)
             return false unless agentfile
             classname = "MCollective::Agent::#{agentname.capitalize}"
+            pluginname = "#{agentname}_agent"
 
-            PluginManager.delete("#{agentname}_agent")
+            PluginManager.delete(pluginname)
 
             begin
                 single_instance = ["registration", "discovery"].include?(agentname)
 
                 PluginManager.loadclass(classname)
-                PluginManager << {:type => "#{agentname}_agent", :class => classname, :single_instance => single_instance}
+                PluginManager << {:type => pluginname, :class => classname, :single_instance => single_instance}
 
                 unless @@agents.include?(agentname)
                     Util.subscribe(Util.make_target(agentname, :command))
-
-                    Util.subscribe(Util.make_target(agentname, :command, nil, true)) if PluginManager["#{agentname}_agent"].queued?
+                    Util.subscribe(Util.make_target(agentname, :command, nil, true)) if PluginManager[pluginname].class.queued?
                 end
 
                 @@agents[agentname] = {:file => agentfile}

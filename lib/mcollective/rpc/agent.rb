@@ -268,6 +268,10 @@ module MCollective
                 false
             end
 
+            def queued?
+                self.queued?
+            end
+
             def self.queued_requests
                 class_eval("
                     def self.queued?
