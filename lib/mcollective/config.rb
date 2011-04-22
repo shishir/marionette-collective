@@ -9,7 +9,7 @@ module MCollective
                     :classesfile, :rpcauditprovider, :rpcaudit, :configdir, :rpcauthprovider,
                     :rpcauthorization, :color, :configfile, :rpchelptemplate, :rpclimitmethod,
                     :logger_type, :fact_cache_time, :collectives, :main_collective, :ssl_cipher,
-                    :queueprefix
+                    :queueprefix, :identity_queue
 
         def initialize
             @configured = false
@@ -42,6 +42,8 @@ module MCollective
                                     @main_collective = val
                                 when "queueprefix"
                                     @queueprefix = val
+                                when "identity_queue"
+                                    val =~ /^1|y/i ? @identity_queue = true : @identity_queue = false
                                 when "topicprefix"
                                     @topicprefix = val
                                 when "logfile"
@@ -119,6 +121,10 @@ module MCollective
         end
 
         def set_config_defaults(configfile)
+            @topicprefix = "/topic/"
+            @queueprefix = "/queue/"
+            @topicsep = "."
+            @identity_queue = false
             @stomp = Hash.new
             @subscribe = Array.new
             @pluginconf = Hash.new
@@ -128,7 +134,6 @@ module MCollective
             @identity = Socket.gethostname
             @registration = "Agentlist"
             @registerinterval = 0
-            @topicsep = "."
             @classesfile = "/var/lib/puppet/classes.txt"
             @rpcaudit = false
             @rpcauditprovider = ""

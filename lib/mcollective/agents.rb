@@ -51,7 +51,12 @@ module MCollective
 
                 unless @@agents.include?(agentname)
                     Util.subscribe(Util.make_target(agentname, :command))
-                    Util.subscribe(Util.make_target(agentname, :command, nil, true)) if PluginManager[pluginname].class.queued?
+
+                    begin
+                        agent = PluginManager[pluginname].class
+                        Util.subscribe(Util.make_target(agentname, :command, nil, true)) if agent.queued?
+                    rescue
+                    end
                 end
 
                 @@agents[agentname] = {:file => agentfile}

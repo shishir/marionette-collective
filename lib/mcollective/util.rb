@@ -159,7 +159,7 @@ module MCollective
         def self.make_target(agent, type, collective=nil, queued=false)
             config = Config.instance
 
-            raise("Unknown target type #{type}") unless [:command, :reply, :queue].include?(type)
+            raise("Unknown target type #{type}") unless [:command, :reply].include?(type)
 
             prefix = config.topicprefix
             prefix = config.queueprefix if queued
@@ -242,6 +242,23 @@ module MCollective
             str.gsub!(/\n/, "'\n'")
 
             return str
+        end
+
+        # Tries to figure out the agent and collective based on
+        # the topic alone, this is used while we maintain backwards compat only
+        def self.parse_target(target)
+            sep = Regexp.escape(Config.instance.topicsep)
+            prefix = Regexp.escape(Config.instance.topicprefix)
+
+            ret = {:collective => nil, :agent => nil}
+
+            regex = "#{prefix}(.+?)#{sep}(.+?)#{sep}command"
+            if target.match(regex)
+                ret[:collective] = $1
+                ret[:agent] = agent = $2
+            end
+
+            return ret
         end
     end
 end

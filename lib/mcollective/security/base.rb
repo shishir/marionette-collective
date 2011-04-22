@@ -133,14 +133,23 @@ module MCollective
                  :body => body}
             end
 
-            def create_request(reqid, target, filter, msg, initiated_by)
+            def create_request(reqid, target, filter, msg, initiated_by, agent=nil, collective=nil)
                 Log.debug("Encoding a request for '#{target}' with request id #{reqid}")
+
+                parsed_target = Util.parse_target(target)
+
+                agent = parsed_target[:agent] unless agent
+                collective = parsed_target[:collective] unless collective
+
+                raise "Failed to handle message, could not figure out agent and collective from #{target} and non was specified" unless agent && collective
 
                 req = {:body => msg,
                        :senderid => @config.identity,
                        :requestid => reqid,
                        :msgtarget => target,
                        :filter => filter,
+                       :agent => agent,
+                       :collective => collective,
                        :msgtime => Time.now.to_i}
 
                 # if we're in use by a client add the callerid to the main client hashes

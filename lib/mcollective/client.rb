@@ -35,14 +35,31 @@ module MCollective
             @connection.disconnect
         end
 
+        def queue_request?(agent)
+            return false if agent.to_s == "discovery"
+            return true if @options[:queue_request]
+
+            return false
+        end
+
+        def make_target(agent, targetid=nil)
+            if queue_request?(agent) && targetid
+                target = Util.make_target(targetid, :command, collective, true)
+            else
+                target = Util.make_target(agent, :command, collective, false)
+            end
+
+            return target
+        end
+
         # Sends a request and returns the generated request id, doesn't wait for
         # responses and doesn't execute any passed in code blocks for responses
-        def sendreq(msg, agent, filter = {})
-            target = Util.make_target(agent, :command, collective)
+        def sendreq(msg, agent, filter = {}, targetid=nil)
+            target = make_target(agent, targetid)
 
             reqid = Digest::MD5.hexdigest("#{@config.identity}-#{Time.now.to_f.to_s}-#{target}")
 
-            req = @security.encoderequest(@config.identity, target, msg, reqid, filter)
+            req = @security.encoderequest(@config.identity, target, msg, reqid, filter, agent, collective)
 
             Log.debug("Sending request #{reqid} to #{target}")
 
@@ -119,18 +136,34 @@ module MCollective
         #
         # It returns a hash of times and timeouts for discovery and total run is taken from the options
         # hash which in turn is generally built using MCollective::Optionparser
-        def req(body, agent, options=false, waitfor=0)
+        def req(body, agent, options=nil, waitfor_hosts=[])
             stat = {:starttime => Time.now.to_f, :discoverytime => 0, :blocktime => 0, :totaltime => 0}
 
-            options = @options unless options
+            options ||= @options
 
             STDOUT.sync = true
 
             hosts_responded = 0
+            targetid = nil
+
+            waitfor_hosts = [waitfor_hosts].flatten
+
+            if waitfor_hosts.is_a?(Fixnum)
+                waitfor = waitfor_hosts
+            else
+                waitfor_hosts = [waitfor_hosts].flatten
+                waitfor = waitfor_hosts.size
+
+                if waitfor_hosts.size == 1
+                    targetid = waitfor_hosts[0]
+                    @options[:queue_request] = true
+                    Log.debug("Sending request to target queue rather than broadcasting") if waitfor_hosts.size == 1
+                end
+            end
 
             begin
                 Timeout.timeout(options[:timeout]) do
-                    reqid = sendreq(body, agent, options[:filter])
+                    reqid = sendreq(body, agent, options[:filter], targetid)
 
                     loop do
                         resp = receive(reqid)
@@ -190,7 +223,12 @@ module MCollective
 
             begin
                 Timeout.timeout(options[:timeout]) do
-                    reqid = sendreq(body, agent, options[:filter])
+                    # Use the host specific queue if we're just talking to one host
+                    if discovered == 1
+                        reqid = sendreq(body, agent, options[:filter], discovered_hosts[0])
+                    else
+                        reqid = sendreq(body, agent, options[:filter])
+                    end
 
                     (1..discovered).each do |c|
                         resp = receive(reqid)

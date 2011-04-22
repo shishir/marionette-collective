@@ -47,6 +47,8 @@ module MCollective
             controltopics = Util.make_target("mcollective", :command)
             Util.subscribe(controltopics)
 
+            Util.subscribe(Util.make_target(@config.identity, :command, @config.main_collective, true)) if @config.identity_queue
+
             # Start the registration plugin if interval isn't 0
             begin
                 PluginManager["registration_plugin"].run(@connection) unless @config.registerinterval == 0
@@ -59,14 +61,13 @@ module MCollective
                     msg = receive
                     dest = msg[:msgtarget]
 
-                    sep = Regexp.escape(@config.topicsep)
-                    prefix = Regexp.escape(@config.topicprefix)
-                    regex = "#{prefix}(.+?)#{sep}(.+?)#{sep}command"
-                    if dest.match(regex)
-                        collective = $1
-                        agent = $2
+                    if msg.include?(:collective) && msg.include?(:agent)
+                        agent = msg[:agent]
+                        collective = msg[:collective]
                     else
-                        raise "Failed to handle message, could not figure out agent and collective from #{dest}"
+                        parsed = Util.parse_target(msg[:msgtarget])
+                        agent = parsed[:agent]
+                        collective = parsed[:collective]
                     end
 
                     if agent == "mcollective"

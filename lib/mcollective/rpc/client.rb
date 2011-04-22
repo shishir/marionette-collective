@@ -47,6 +47,7 @@ module MCollective
                 @discovered_agents = nil
                 @progress = options[:progress_bar]
                 @limit_targets = options[:mcollective_limit_targets]
+                @queue_request = false
 
                 agent_filter agent
 
@@ -452,7 +453,7 @@ module MCollective
                 respcount = 0
 
                 if disc.size > 0
-                    @client.req(req, @agent, opts, disc.size) do |resp|
+                    @client.req(req, @agent, opts, disc) do |resp|
                         respcount += 1
 
                         if block_given?
