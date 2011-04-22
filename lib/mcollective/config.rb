@@ -8,7 +8,8 @@ module MCollective
                     :securityprovider, :factsource, :registration, :registerinterval, :topicsep,
                     :classesfile, :rpcauditprovider, :rpcaudit, :configdir, :rpcauthprovider,
                     :rpcauthorization, :color, :configfile, :rpchelptemplate, :rpclimitmethod,
-                    :logger_type, :fact_cache_time, :collectives, :main_collective, :ssl_cipher
+                    :logger_type, :fact_cache_time, :collectives, :main_collective, :ssl_cipher,
+                    :queueprefix
 
         def initialize
             @configured = false
@@ -39,6 +40,8 @@ module MCollective
                                     @collectives = val.split(",").map {|c| c.strip}
                                 when "main_collective"
                                     @main_collective = val
+                                when "queueprefix"
+                                    @queueprefix = val
                                 when "topicprefix"
                                     @topicprefix = val
                                 when "logfile"

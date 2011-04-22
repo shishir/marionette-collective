@@ -48,9 +48,14 @@ module MCollective
                 PluginManager.loadclass(classname)
                 PluginManager << {:type => "#{agentname}_agent", :class => classname, :single_instance => single_instance}
 
-                Util.subscribe(Util.make_target(agentname, :command)) unless @@agents.include?(agentname)
+                unless @@agents.include?(agentname)
+                    Util.subscribe(Util.make_target(agentname, :command))
+
+                    Util.subscribe(Util.make_target(agentname, :command, nil, true)) if PluginManager["#{agentname}_agent"].queued?
+                end
 
                 @@agents[agentname] = {:file => agentfile}
+
                 return true
             rescue Exception => e
                 Log.error("Loading agent #{agentname} failed: #{e}")

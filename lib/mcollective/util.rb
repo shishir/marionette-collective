@@ -156,19 +156,21 @@ module MCollective
         #
         # If given a collective name it will return a single target aimed
         # at just the one collective
-        def self.make_target(agent, type, collective=nil)
+        def self.make_target(agent, type, collective=nil, queued=false)
             config = Config.instance
 
-            raise("Unknown target type #{type}") unless type == :command || type == :reply
+            raise("Unknown target type #{type}") unless [:command, :reply, :queue].include?(type)
+
+            queued ? prefix = config.queueprefix : prefix = config.topicprefix
 
             if collective.nil?
                 config.collectives.map do |c|
-                    ["#{config.topicprefix}#{c}", agent, type].join(config.topicsep)
+                    ["#{prefix}#{c}", agent, type].join(config.topicsep)
                 end
             else
                 raise("Unknown collective '#{collective}' known collectives are '#{config.collectives.join ', '}'") unless config.collectives.include?(collective)
 
-                ["#{config.topicprefix}#{collective}", agent, type].join(config.topicsep)
+                ["#{prefix}#{collective}", agent, type].join(config.topicsep)
             end
         end
 

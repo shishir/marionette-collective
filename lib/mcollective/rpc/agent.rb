@@ -264,6 +264,18 @@ module MCollective
                 ")
             end
 
+            def self.queued?
+                false
+            end
+
+            def self.queued_requests
+                class_eval("
+                    def self.queued?
+                        true
+                    end
+                ")
+            end
+
             # Validates a data member, if validation is a regex then it will try to match it
             # else it supports testing object types only:
             #
