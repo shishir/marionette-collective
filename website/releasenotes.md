@@ -21,12 +21,15 @@ This release brings to general availability all the features added in the
 
 ### Enhancements
 
- * Actions can be written in external scripts and therefore other languages
-   than Ruby, wrappers exist for PHP, Perl and Python
+ * The concept of subcollectives were introduced that help you partition
+   your mcollective traffic for network isolation, traffic management and security
  * A new single executable framework has been introduced replacing the old
    _mc-`*`_ commands
- * The concept of sub-collectives were introduced that help you partition
-   your mcollective traffic for network isolation and security
+ * A new AES+RSA security plugin was added that provides strong encryption,
+   client authentication and message security
+ * New fact matching operators <=, >=, <, >, !=, == and =~.
+ * Actions can be written in external scripts and therefore other languages
+   than Ruby, wrappers exist for PHP, Perl and Python
  * A new _plugins.d_ configuration directory has been introduced for plugin
    configuration
  * A convenient and robust exec wrapper has been written to assist in calling
@@ -36,22 +39,21 @@ This release brings to general availability all the features added in the
  * Network timeout handling has been improved to better take account of latency
  * Registration plugins can elect to skip sending of registration data by
    returning _nil_, previously nil data would be published
- * A new AES+RSA security plugin was added that provides strong encryption,
-   client authentication and message security
  * Multiple libdirs are supported
  * The logging framework is pluggable and easier to use
- * New fact matching operators <=, >=, <, >, !=, == and =~.
  * Fact plugins can now force fact cache invalidation.  The YAML plugin will
    force a cache clear as soon as the source yaml file updates
  * The _ping_ application now supports filters
  * The network payload can now be Base64 encoded avoiding isues with Unicode
    characters in older Stomp gems
- * The progress bar now resizes based on terminal dimensions
  * All fact plugins are now cached and only updated every 30 seconds
+ * The progress bar now resizes based on terminal dimensions
 
 ### Deprecations and removed functionality
 
- * The old _mc-`*`_ commands are being removed in favor for the new _mco_ command
+ * The old _mc-`*`_ commands are being removed in favor for the new _mco_ command.
+   The old style is still available and your existing scripts will keep working but
+   porting to the new single executable system is very easy and encouraged.
  * _MCOLLECTIVE_TIMEOUT_ and _MCOLLECTIVE_DTIMEOUT_ were removed in favor of _MCOLLECTIVE_EXTRA_OPTS_
  * The old _mc-controller_ could exit all mcollectived instances, this feature was not
    ported to the new _mco controller_ applications
