@@ -9,6 +9,107 @@ This is a list of release notes for various releases, you should review these be
  * TOC Placeholder
   {:toc}
 
+<a name="1_2_0">&nbsp;</a>
+
+## 1.2.0 - 2011/05/06
+
+This is the next production release of mcollective.  It brings to an
+end active support for versions 1.1.2 and older.
+
+This release brings to general availability all the features added in the
+1.1.x development series.
+
+### Enhancements
+
+ * Actions can be written in external scripts and therefore other languages
+   than Ruby, wrappers exist for PHP, Perl and Python
+ * A new single executable framework has been introduced replacing the old
+   _mc-`*`_ commands
+ * The concept of sub-collectives were introduced that help you partition
+   your mcollective traffic for network isolation and security
+ * A new _plugins.d_ configuration directory has been introduced for plugin
+   configuration
+ * A convenient and robust exec wrapper has been written to assist in calling
+   external scripts
+ * A new environment variable _MCOLLECTIVE_EXTRA_OPTS_ has been added that will
+   add options to all client scripts
+ * Network timeout handling has been improved to better take account of latency
+ * Registration plugins can elect to skip sending of registration data by
+   returning _nil_, previously nil data would be published
+ * A new AES+RSA security plugin was added that provides strong encryption,
+   client authentication and message security
+ * Multiple libdirs are supported
+ * The logging framework is pluggable and easier to use
+ * New fact matching operators <=, >=, <, >, !=, == and =~.
+ * Fact plugins can now force fact cache invalidation.  The YAML plugin will
+   force a cache clear as soon as the source yaml file updates
+ * The _ping_ application now supports filters
+ * The network payload can now be Base64 encoded avoiding isues with Unicode
+   characters in older Stomp gems
+ * The progress bar now resizes based on terminal dimensions
+ * All fact plugins are now cached and only updated every 30 seconds
+
+### Deprecations and removed functionality
+
+ * The old _mc-`*`_ commands are being removed in favor for the new _mco_ command
+ * _MCOLLECTIVE_TIMEOUT_ and _MCOLLECTIVE_DTIMEOUT_ were removed in favor of _MCOLLECTIVE_EXTRA_OPTS_
+ * The old _mc-controller_ could exit all mcollectived instances, this feature was not
+   ported to the new _mco controller_ applications
+
+### Bug Fixes
+
+ * mcollectived and all of the standard supplied client scripts not disconnects
+   cleanly from the middleware avoiding exceptions in the ActiveMQ logs
+ * Communications with the middleware has been made robust by adding a timeout
+   while sending
+ * Machines that do not pass security validation are now handled as having not
+   responded at all
+ * When a fire and forget request was sent, replies were still sent, they are
+   now surpressed
+
+### Backwards compatability
+
+This release can communicate with machines running older versions of mcollective
+there are though a few steps to take to ensure a smooth upgrade.
+
+#### Backward compatible subcollective setup
+
+{% highlight ini %}
+topicprefix = /topic/mcollective
+{% endhighlight %}
+
+This has to change to:
+
+{% highlight ini %}
+topicprefix = /topic/
+main_collective = mcollective
+collectives = mcollective
+{% endhighlight %}
+
+#### Security Plugins
+
+The interface for the _encodereply_ method on the security plugins have changed
+if you are using any of the community plugins or wrote your own you should update
+them with the latest at the time you upgrade to 1.2.0
+
+#### Fact Plugins
+
+The interface to the fact plugins have been greatly simplified, this means you need to
+update to new plugins at the time you upgrade to 1.2.0
+
+You can place these new plugins into the plugindir before upgrading. The old mcollective
+will not use these plugins and the new one will not touch the old ones. This will allow
+for a clean rollback.
+
+Once the new version is deployed you will immediately have caching on all fact types
+at 3000 seconds you can tune this using the fact_cache_time setting in the configuration file.
+
+#### New fact selectors
+
+The new fact selectors are only available on newer versions of mcollective.  If a client
+attempts to use them and an older version of the server is on the network those older
+servers will treat all fact lookups as ==
+
 <a name="1_1_4">&nbsp;</a>
 
 ## 1.1.4 - 2011/04/07
