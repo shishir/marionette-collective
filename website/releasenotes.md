@@ -48,6 +48,8 @@ This release brings to general availability all the features added in the
    characters in older Stomp gems
  * All fact plugins are now cached and only updated every 30 seconds
  * The progress bar now resizes based on terminal dimensions
+ * DDL files with missing output blocks will not invalidate the whole DDL
+ * Display of DDL assisted complex data has been improved to be more readable
 
 ### Deprecations and removed functionality
 
