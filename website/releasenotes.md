@@ -50,6 +50,8 @@ This release brings to general availability all the features added in the
  * The progress bar now resizes based on terminal dimensions
  * DDL files with missing output blocks will not invalidate the whole DDL
  * Display of DDL assisted complex data has been improved to be more readable
+ * Stomp messages can have a priority header added for use with recent versions
+   of ActiveMQ
 
 ### Deprecations and removed functionality
 
