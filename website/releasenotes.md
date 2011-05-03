@@ -53,6 +53,8 @@ This release brings to general availability all the features added in the
    of ActiveMQ
  * Almost 300 unit tests have been written, lots of old code and any new code being
    written is subject to continious testing on Ruby 1.8.5, 1.8.6 and 1.9.2
+ * Improved the Red Hat RC script to be more compliant with distribution policies
+   and to reuse the builtin functions
 
 ### Deprecations and removed functionality
 
@@ -121,6 +123,7 @@ servers will treat all fact lookups as ==
 
 |Date|Description|Ticket|
 |----|-----------|------|
+|2011/05/03|Improve Red Hat RC script by using distro builtin functions|7340|
 |2011/05/01|Support setting a priority on Stomp messages|7246|
 |2011/04/30|Handle broken and incomplete DDLs better and improve the format of DDL output|7191|
 |2011/04/23|Encode the target agent and collective in requests|7223|
