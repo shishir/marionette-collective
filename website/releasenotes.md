@@ -14,7 +14,7 @@ This is a list of release notes for various releases, you should review these be
 ## 1.2.0 - 2011/05/06
 
 This is the next production release of mcollective.  It brings to an
-end active support for versions 1.1.2 and older.
+end active support for versions 1.1.4 and older.
 
 This release brings to general availability all the features added in the
 1.1.x development series.
@@ -23,18 +23,17 @@ This release brings to general availability all the features added in the
 
  * The concept of subcollectives were introduced that help you partition
    your mcollective traffic for network isolation, traffic management and security
- * A new single executable framework has been introduced replacing the old
+ * The single executable framework has been introduced replacing the old
    _mc-`*`_ commands
  * A new AES+RSA security plugin was added that provides strong encryption,
    client authentication and message security
  * New fact matching operators <=, >=, <, >, !=, == and =~.
  * Actions can be written in external scripts and therefore other languages
    than Ruby, wrappers exist for PHP, Perl and Python
- * A new _plugins.d_ configuration directory has been introduced for plugin
-   configuration
+ * Plugins can now be configured using the _plugins.d_ directory
  * A convenient and robust exec wrapper has been written to assist in calling
    external scripts
- * A new environment variable _MCOLLECTIVE_EXTRA_OPTS_ has been added that will
+ * The _MCOLLECTIVE_EXTRA_OPTS_ environment variable has been added that will
    add options to all client scripts
  * Network timeout handling has been improved to better take account of latency
  * Registration plugins can elect to skip sending of registration data by
@@ -44,14 +43,16 @@ This release brings to general availability all the features added in the
  * Fact plugins can now force fact cache invalidation.  The YAML plugin will
    force a cache clear as soon as the source yaml file updates
  * The _ping_ application now supports filters
- * The network payload can now be Base64 encoded avoiding isues with Unicode
-   characters in older Stomp gems
- * All fact plugins are now cached and only updated every 30 seconds
+ * Network payload can now be Base64 encoded avoiding isues with Unicode characters
+   in older Stomp gems
+ * All fact plugins are now cached and only updated every 300 seconds
  * The progress bar now resizes based on terminal dimensions
  * DDL files with missing output blocks will not invalidate the whole DDL
  * Display of DDL assisted complex data has been improved to be more readable
  * Stomp messages can have a priority header added for use with recent versions
    of ActiveMQ
+ * Almost 300 unit tests have been written, lots of old code and any new code being
+   written is subject to continious testing on Ruby 1.8.5, 1.8.6 and 1.9.2
 
 ### Deprecations and removed functionality
 
@@ -59,12 +60,12 @@ This release brings to general availability all the features added in the
    The old style is still available and your existing scripts will keep working but
    porting to the new single executable system is very easy and encouraged.
  * _MCOLLECTIVE_TIMEOUT_ and _MCOLLECTIVE_DTIMEOUT_ were removed in favor of _MCOLLECTIVE_EXTRA_OPTS_
- * The old _mc-controller_ could exit all mcollectived instances, this feature was not
-   ported to the new _mco controller_ applications
+ * _mc-controller_ could exit all mcollectived instances, this feature was not ported
+   to the new _mco controller_ application
 
 ### Bug Fixes
 
- * mcollectived and all of the standard supplied client scripts not disconnects
+ * mcollectived and all of the standard supplied client scripts now disconnects
    cleanly from the middleware avoiding exceptions in the ActiveMQ logs
  * Communications with the middleware has been made robust by adding a timeout
    while sending
@@ -108,13 +109,33 @@ will not use these plugins and the new one will not touch the old ones. This wil
 for a clean rollback.
 
 Once the new version is deployed you will immediately have caching on all fact types
-at 3000 seconds you can tune this using the fact_cache_time setting in the configuration file.
+at 300 seconds you can tune this using the fact_cache_time setting in the configuration file.
 
 #### New fact selectors
 
 The new fact selectors are only available on newer versions of mcollective.  If a client
 attempts to use them and an older version of the server is on the network those older
 servers will treat all fact lookups as ==
+
+#### Changes since 1.1.4
+
+|Date|Description|Ticket|
+|----|-----------|------|
+|2011/05/01|Support setting a priority on Stomp messages|7246|
+|2011/04/30|Handle broken and incomplete DDLs better and improve the format of DDL output|7191|
+|2011/04/23|Encode the target agent and collective in requests|7223|
+|2011/04/20|Make the SSL Cipher used a config option|7191|
+|2011/04/20|Add a clear method to the PluginManager that deletes all plugins, improve test isolation|7176|
+|2011/04/19|Abstract the creation of request and reply hashes to simplify connector plugin development|5701|
+|2011/04/15|Improve the shellsafe validator and add a Util method to do shell escaping|7066|
+|2011/04/14|Update Rakefile to have a mail_patches task|6874|
+|2011/04/13|Update vendored systemu library for Ruby 1.9.2 compatability|7067|
+|2011/04/12|Fix failing tests on Ruby 1.9.2|7067|
+|2011/04/11|Update the DDL documentation to reflect the _mco help_ command|7042|
+|2011/04/11|Document the use filters on the CLI|5917|
+|2011/04/11|Improve handling of unknown facts in Util#has_fact? to avoid exceptions about nil#clone|6956|
+|2011/04/11|Correctly set timeout on the discovery agent to 5 seconds as default|7045|
+|2011/04/11|Let rpcutil#agent_inventory supply _unknown_ for missing values in agent meta data|7044|
 
 <a name="1_1_4">&nbsp;</a>
 
