@@ -21,7 +21,7 @@ This release brings to general availability all the features added in the
 
 ### Enhancements
 
- * The concept of subcollectives were introduced that help you partition
+ * The concept of sub-collectives were introduced that help you partition
    your mcollective traffic for network isolation, traffic management and security
  * The single executable framework has been introduced replacing the old
    _mc-`*`_ commands
@@ -76,7 +76,7 @@ This release brings to general availability all the features added in the
  * When a fire and forget request was sent, replies were still sent, they are
    now surpressed
 
-### Backwards compatability
+### Backwards compatibility
 
 This release can communicate with machines running older versions of mcollective
 there are though a few steps to take to ensure a smooth upgrade.
@@ -132,7 +132,7 @@ servers will treat all fact lookups as ==
 |2011/04/19|Abstract the creation of request and reply hashes to simplify connector plugin development|5701|
 |2011/04/15|Improve the shellsafe validator and add a Util method to do shell escaping|7066|
 |2011/04/14|Update Rakefile to have a mail_patches task|6874|
-|2011/04/13|Update vendored systemu library for Ruby 1.9.2 compatability|7067|
+|2011/04/13|Update vendored systemu library for Ruby 1.9.2 compatibility|7067|
 |2011/04/12|Fix failing tests on Ruby 1.9.2|7067|
 |2011/04/11|Update the DDL documentation to reflect the _mco help_ command|7042|
 |2011/04/11|Document the use filters on the CLI|5917|
@@ -178,11 +178,11 @@ Special thanks to the community members who contributed the wrappers.
 
  * When mcollectived exits it now cleanly disconnects from the Middleware
  * The _rpcutil_ agent is less strict about valid Fact names
- * The default configuration files have been updated for subcollectives
+ * The default configuration files have been updated for sub-collectives
 
 ### Backwards Compatibility
 
-This release will be backward compatible with version _1.1.3_ for compatability
+This release will be backward compatible with version _1.1.3_ for compatibility
 with earlier releases see the notes for _1.1.3_ and the sub collective related
 configuration changes.
 
@@ -195,7 +195,7 @@ configuration changes.
 |2011/03/23|Disconnect from the middleware when mcollectived disconnects|6821|
 |2011/03/21|Update rpcutil ddl file to be less strict about valid fact names|6764|
 |2011/03/22|Support reading configuration from configfir/plugin.d for plugins|6623|
-|2011/03/21|Update default configuration files for subcollectives|6741|
+|2011/03/21|Update default configuration files for sub-collectives|6741|
 |2011/03/16|Add the ability to implement actions using external scripts|6705|
 |2011/03/15|Port mc-controller to the Application framework and deprecate the exit command|6637|
 |2011/03/13|Only cache registration and discovery agents, handle the rest as new instances|6692|
@@ -212,13 +212,13 @@ This release is for early adopters, production users should consider the 1.0.x s
 
 ### Enhancements
 
- * Add the ability to partition collectives into subcollectives for security and
+ * Add the ability to partition collectives into sub-collectives for security and
    network traffic management
  * Add a exec wrapper for agents that provides unique environments and cwds in a
    thread safe manner as well as avoid zombie processes
  * Automatically pass Application options to rpcclient when options are not
    specifically provided
- * Reneame _/usr/sbin/mc_ to _/usr/bin/mco_
+ * Rename _/usr/sbin/mc_ to _/usr/bin/mco_
 
 ### Bug Fixes
 
@@ -231,7 +231,7 @@ This release is for early adopters, production users should consider the 1.0.x s
 ### Backwards Compatibility
 
 The configuration format has changed slightly to accomodate the concept of
-collective names and subcollectives.
+collective names and sub-collectives.
 
 In older releases the configuration was:
 
@@ -263,7 +263,7 @@ directives as the above settings would be their defaults
 |2011/03/01|Wrap rpcclient in applications ensuring that options is always set|6308|
 |2011/02/28|Make communicating with the middleware more robust by including send calls in timeouts|6505|
 |2011/02/28|Create a wrapper to safely run shell commands avoiding zombies|6392|
-|2011/02/19|Introduce Subcollectives for network partitioning|5967|
+|2011/02/19|Introduce Sub-collectives for network partitioning|5967|
 |2011/02/19|Improve error handling when parsing arguments in the rpc application|6388|
 |2011/02/19|Fix error logging when file_logger creation fails|6387|
 |2011/02/17|Correctly parse MCOLLECTIVE_EXTRA_OPTS in the new unified binary framework|6354|
@@ -328,10 +328,10 @@ This release is for early adopters, production users should consider the 1.0.x s
 |----|-----------|------|
 |2011/02/13|Surpress replies to SimpleRPC clients who did not request results|6305|
 |2011/02/11|Fix Debian packaging error due to the same file in multiple packages|6276|
-|2011/02/11|The application framework will now disconnect from the middleware for consistancy|6292|
+|2011/02/11|The application framework will now disconnect from the middleware for consistency|6292|
 |2011/02/11|Returning _nil_ from a registration plugin will skip registration|6289|
 |2011/02/11|Set loglevel to warn by default if not specified in the config file|6287|
-|2011/02/10|Fix backward compatability with empty fact strings|6278|
+|2011/02/10|Fix backward compatibility with empty fact strings|6278|
 
 ## 1.1.1 - 2011/02/02
 
@@ -353,7 +353,7 @@ but we felt it was a often requested feature and so decided to implement it.
 Full documentation for this plugin can be found [in our docs](reference/plugins/security_aes.html), please read them very
 carefully should you choose to deploy this plugin.
 
-### Single Exeuctable Framework
+### Single Executable Framework
 
 In the past a lot of the CLI tools have behaved inconsistently as the mc scripts were
 mostly just written to serve immediate needs, we are starting a process of improving
@@ -412,7 +412,7 @@ _-v_ to the command line you can get full Ruby backtraces.
 We've maintained backward compatibility by creating wrappers for all the old mc scripts but these
 might be deprecated in future.
 
-These application live in the normal plugin directories and should make it much easier to distrubute
+These application live in the normal plugin directories and should make it much easier to distribute
 plugins in future.
 
 We will port the scripts for plugins to this framework and encourage you to do the same when writing
@@ -420,9 +420,9 @@ new CLI tools.  An example of a ported CLI can be seen in the _filemgr_ agent.
 
 Find the documentation for these plugins [here](reference/plugins/application.html).
 
-### Miscelaneous Improvements
+### Miscellaneous Improvements
 
-The logging system has been refactored to not use a Signleton, logging messages are now simply:
+The logging system has been ra-efactored to not use a Signleton, logging messages are now simply:
 
 {% highlight ruby %}
 MCollective::Log.notice("hello world")
@@ -507,7 +507,7 @@ we will as before try to keep these releases solid and production quality.
 Production users who do not wish to have rapid change should use release 1.0.0.
 
 This release focus mainly on getting all the community contributed code into a release
-and adressing some issues I had but wasn't comfortable fixing them late in the
+and addressing some issues I had but wasn't comfortable fixing them late in the
 previous development series.
 
 Please read these notes carefully we are **removing** some old functionality and changing
@@ -521,7 +521,7 @@ some internals, you need to carefully review the text below.
 
 ### Improvements
 
- * libdir can now be multiple directories specified with : seperation - Thanks to Richard Clamp
+ * libdir can now be multiple directories specified with : separation - Thanks to Richard Clamp
  * Logging is now pluggable, 3 logger types are supported - file, syslog and console.  Thanks to
    Nicolas Szalay for the initial Syslog code
  * A new experimental ssh agent based security system.  Thanks to Jordan Sissel
@@ -529,7 +529,7 @@ some internals, you need to carefully review the text below.
  * SimpleRPC fact_filter method can now take any valid fact string as input in addition to the old format
  * A message gets logged at startup showing mcollective version and logging level
  * The fact plugin format has been changed, simplified, made thread safe and global caching added.
-   This breaks backward compatability with old fact sources
+   This breaks backward compatibility with old fact sources
  * Creating options hashes has been simplified by adding a helper that creates them for you
  * Calculating the client timeout has been improved by including for latency and fact source slowness
  * Audit log lines are now on one line and include a ISO 8601 format date
@@ -566,16 +566,16 @@ you can tune this using the fact_cache_time setting in the configuration file.
 |2010/12/26|Improve the SimpleRPC fact_filter helper to support new fact operators|5678|
 |2010/12/25|Increase the rpcutil timeout to allow for slow facts|5679|
 |2010/12/25|Allow for network and fact source latency when calculating client timeout|5676|
-|2010/12/25|Remove MCOLLECTIVE_TIMEOUT and MCOLLECTIVE_DTIMEOUT environment vars in favour of MCOLLECTIVE_EXTRA_OPTS|5675|
+|2010/12/25|Remove MCOLLECTIVE_TIMEOUT and MCOLLECTIVE_DTIMEOUT environment vars in favor of MCOLLECTIVE_EXTRA_OPTS|5675|
 |2010/12/25|Refactor the creation of the options hash so other tools don't need to know the internal formats|5672|
 |2010/12/21|The fact plugin format has been changed and simplified, the base now provides caching and thread safety|5083|
 |2010/12/20|Add parameters <=, >=, <, >, !=, == and =~ to fact selection|5084|
 |2010/12/14|Add experimental sshkey security plugin|5085|
 |2010/12/13|Log a startup message showing version and log level|5538|
 |2010/12/13|Add a console logger|5537|
-|2010/12/13|Logging is now plugable and a syslog plugin was provided|5082|
+|2010/12/13|Logging is now pluggable and a syslog plugin was provided|5082|
 |2010/12/13|Allow libdir to be an array of directories for agents and ddl files|5253|
-|2010/12/13|The progress bar will now intelligently figure out the terminal dimentions|5524|
+|2010/12/13|The progress bar will now intelligently figure out the terminal dimensions|5524|
 
 ## 1.0.0 - 2010/12/13
 
@@ -612,7 +612,7 @@ The first feature is a major new feature in SimpleRPC.  If you expose a service 
 on your network using MCollective you wouldn't always want to send requests to all the
 nodes providing the service.  You can now limit the requests to an arbitrary amount
 using the new --limit-nodes option which will also take a percentage.  A shortcut -1 has
-been added that is the equivelant to --limit-nodes 1
+been added that is the equivalent to --limit-nodes 1
 
 ### Backwards Compatibility
 
@@ -656,7 +656,7 @@ you can use _mc-controller exit_ to exit all your _mcollectived_ processes at th
 
  * The PSK security plugin can now be configured to set the callerid to a few different values
    useful for cases where you want to do group based RPC Authorization for example.
- * Info logging has been minimised by demoting the 'not targetted at us' message to debug
+ * Info logging has been minimised by demoting the 'not targeted at us' message to debug
  * Document the 'exit' option to mc-controller
 
 ### Backwards Compatibility
@@ -737,7 +737,7 @@ This is a bug fix and minor improvement release.
 
  * Users can now have a _~/.mcollective_ file which will be preferred over over _/etc/mcollective/client.cfg_ if it exists.  You can still use _--config_ to override.
 
- * The SSL Security plugin can now use "either YAML or Marshal for serialization":/reference/plugins/security_ssl.html#serialization_method, this means other programming languages can be used as clients.  A sample Perl client is included in the ext directory.  Marshal remains the default for backwards compatibilty
+ * The SSL Security plugin can now use "either YAML or Marshal for serialization":/reference/plugins/security_ssl.html#serialization_method, this means other programming languages can be used as clients.  A sample Perl client is included in the ext directory.  Marshal remains the default for backwards compatibility
 
  * _mc-inventory_ can now be used to create "custom reports using a small reporting DSL":/reference/ui/nodereports.html, this enable you to build custom reports listing all your machines and gives you access to facts, agents and classes lists.
 
@@ -779,21 +779,21 @@ A "screencast of the DDL integration":http://mcollective.blip.tv/file/3799653 an
 
 ### Bug Fixes
 
-A serious issue has been fixed wrt complex agents.  If you attempted to use multiple agents from the same script errors such as duplicate discovery results or simply not working.
+A serious issue has been fixed with regard to complex agents.  If you attempted to use multiple agents from the same script errors such as duplicate discovery results or simply not working.
 
-The default fact source has been changed to Yaml, it was inadvertently set to Facter int he past.
+The default fact source has been changed to YAML, it was inadvertently set to Facter in the past.
 
 Some previously unhandled exceptions are now being handled correctly and passed onto the clients as failed requests rather than no responses at all.
 
 ### Backwards Compatibility
 
-This release will be backward compatible with older releases.  The change to Yaml fact source by default might impact you if you did not previously specify a fact source in the configuration files.
+This release will be backward compatible with older releases.  The change to YAML fact source by default might impact you if you did not previously specify a fact source in the configuration files.
 
 ### Changes
 
 |Date|Description|Ticket|
 |----|-----------|------|
-| 2010/06/27 | Change default factsource to Yaml|106|
+| 2010/06/27 | Change default factsource to YAML|106|
 | 2010/06/27 | Added VIM snippets to create DDLs and Agents|102|
 | 2010/06/26 | DDL based help now works better with Symbols in in/output|105|
 | 2010/06/23 | Whitespace at the end of config lines are now stripped|100|
@@ -815,7 +815,7 @@ We're focusing mainly on the Stomp connector and on the SimpleRPC agents in this
 
 ### Stomp Connector
 
-We've historically been stuck just using Rubygem Stomp 1.1 due to multi threading bugs in the newer releases.  All attempts to contact the authors failed.  Recently though I had some luck and these issues are resolved in the RubyGem Stomp 1.1.6 release.
+We've historically been stuck just using RubyGem Stomp 1.1 due to multi threading bugs in the newer releases.  All attempts to contact the authors failed.  Recently though I had some luck and these issues are resolved in the RubyGem Stomp 1.1.6 release.
 
 This means we can take advantage of a lot of new features such as connection pooling for failover/ha and also SSL TLS between nodes and ActiveMQ server.
 
@@ -845,7 +845,7 @@ This release will be backward compatible with older releases, the new Stomp feat
 | 2010/06/12 | Qualify the Process class to avoid clashes in the discovery agent|88|
 | 2010/06/12 | Add mc-inventory which shows agents, classes and facts for a node|87|
 | 2010/06/11 | mc-facts now supports standard filters|86|
-| 2010/06/11 | Add connection pool retry options and ssl for connection|85|
+| 2010/06/11 | Add connection pool retry options and SSL for connection|85|
 | 2010/06/11 | Add support for specifying multiple stomp hosts for failover|84|
 | 2010/06/10 | Tighten up handling of filters to avoid nil's getting into them|83|
 | 2010/06/09 | Sort the mc-facts output to be more readable|82|
@@ -959,7 +959,7 @@ In future we might add auditing to the client libraries so requests will be logg
 
 ### New _fail!_ method for SimpleRPC
 
-Till now while writing agents you can use the _fail_ method to set statusses in the reply, this however did not also raise exceptions and terminate execution of the agent immediately.
+Till now while writing agents you can use the _fail_ method to set statuses in the reply, this however did not also raise exceptions and terminate execution of the agent immediately.
 
 Often the existing behavior is required but it did lead to some awkward code when you did want to just exit the agent immediately as well as set a fail status.  We've added a _fail!_ method that works just like _fail_ except it stops execution of your agent immediately.
 
