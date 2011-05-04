@@ -13,7 +13,7 @@ This is a list of release notes for various releases, you should review these be
 
 ## 1.2.0 - 2011/05/06
 
-This is the next production release of mcollective.  It brings to an
+This is the next production release of MCollective.  It brings to an
 end active support for versions 1.1.4 and older.
 
 This release brings to general availability all the features added in the
@@ -22,7 +22,7 @@ This release brings to general availability all the features added in the
 ### Enhancements
 
  * The concept of sub-collectives were introduced that help you partition
-   your mcollective traffic for network isolation, traffic management and security
+   your MCollective traffic for network isolation, traffic management and security
  * The single executable framework has been introduced replacing the old
    _mc-`*`_ commands
  * A new AES+RSA security plugin was added that provides strong encryption,
@@ -41,9 +41,9 @@ This release brings to general availability all the features added in the
  * Multiple libdirs are supported
  * The logging framework is pluggable and easier to use
  * Fact plugins can now force fact cache invalidation.  The YAML plugin will
-   force a cache clear as soon as the source yaml file updates
+   force a cache clear as soon as the source YAML file updates
  * The _ping_ application now supports filters
- * Network payload can now be Base64 encoded avoiding isues with Unicode characters
+ * Network payload can now be Base64 encoded avoiding issues with Unicode characters
    in older Stomp gems
  * All fact plugins are now cached and only updated every 300 seconds
  * The progress bar now resizes based on terminal dimensions
@@ -52,7 +52,7 @@ This release brings to general availability all the features added in the
  * Stomp messages can have a priority header added for use with recent versions
    of ActiveMQ
  * Almost 300 unit tests have been written, lots of old code and any new code being
-   written is subject to continious testing on Ruby 1.8.5, 1.8.6 and 1.9.2
+   written is subject to continuos testing on Ruby 1.8.5, 1.8.6 and 1.9.2
  * Improved the Red Hat RC script to be more compliant with distribution policies
    and to reuse the builtin functions
 
@@ -74,14 +74,14 @@ This release brings to general availability all the features added in the
  * Machines that do not pass security validation are now handled as having not
    responded at all
  * When a fire and forget request was sent, replies were still sent, they are
-   now surpressed
+   now suppressed
 
 ### Backwards compatibility
 
 This release can communicate with machines running older versions of mcollective
 there are though a few steps to take to ensure a smooth upgrade.
 
-#### Backward compatible subcollective setup
+#### Backward compatible sub-collective setup
 
 {% highlight ini %}
 topicprefix = /topic/mcollective
@@ -132,7 +132,7 @@ servers will treat all fact lookups as ==
 |2011/04/19|Abstract the creation of request and reply hashes to simplify connector plugin development|5701|
 |2011/04/15|Improve the shellsafe validator and add a Util method to do shell escaping|7066|
 |2011/04/14|Update Rakefile to have a mail_patches task|6874|
-|2011/04/13|Update vendored systemu library for Ruby 1.9.2 compatibility|7067|
+|2011/04/13|Update vendored systemu library for Ruby 1.9.2 compatibility |7067|
 |2011/04/12|Fix failing tests on Ruby 1.9.2|7067|
 |2011/04/11|Update the DDL documentation to reflect the _mco help_ command|7042|
 |2011/04/11|Document the use filters on the CLI|5917|
@@ -169,7 +169,7 @@ Special thanks to the community members who contributed the wrappers.
 
  * Actions can now be written in any language
  * Plugin configuration can be kept in _/etc/mcollective/plugin.d_
- * _mco inventory_ now shows collective and subcollective membership
+ * _mco inventory_ now shows collective and sub-collective membership
  * mc-controller has been deprecated for _mco controller_
  * Agents are now ran using new instances of the classes rather than reuse the exiting
    one to avoid concurrency related problems
@@ -248,7 +248,7 @@ collectives = mcollective
 {% endhighlight %}
 
 When setup as above a old and new version will be compatible but as soon as you
-start configuring the new subcollective feature you will loose compatiblity
+start configuring the new sub-collective feature you will loose compatiblity
 between versions.
 
 Various defaults apply, if you configure it with these exactly topic and
