@@ -332,9 +332,7 @@ module MCollective
 
                 verbose = false unless @output_format == :console
 
-                pp options
-
-                if options[:filter]["identity"].select{|i| i.start_with?("/")}.size == 0
+                if options[:filter]["identity"].size > 0 && options[:filter]["identity"].select{|i| i.start_with?("/")}.size == 0
                     @discovered_agents = options[:filter]["identity"].clone
 
                 elsif @discovered_agents == nil
