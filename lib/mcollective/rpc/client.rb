@@ -320,7 +320,7 @@ module MCollective
                 agent_filter @agent
             end
 
-            # Does discovery based on the filters set, i a discovery was
+            # Does discovery based on the filters set, if a discovery was
             # previously done return that else do a new discovery.
             #
             # Will show a message indicating its doing discovery if running
@@ -332,7 +332,12 @@ module MCollective
 
                 verbose = false unless @output_format == :console
 
-                if @discovered_agents == nil
+                pp options
+
+                if options[:filter]["identity"].select{|i| i.start_with?("/")}.size == 0
+                    @discovered_agents = options[:filter]["identity"].clone
+
+                elsif @discovered_agents == nil
                     @stats.time_discovery :start
 
                     STDERR.print("Determining the amount of hosts matching filter for #{discovery_timeout} seconds .... ") if verbose

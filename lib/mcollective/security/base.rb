@@ -125,14 +125,12 @@ module MCollective
                             end
 
                         when "identity"
-                            filter[key].each do |f|
-                                if Util.has_identity?(f)
-                                    Log.debug("Passing based on identity = #{f}")
-                                    passed += 1
-                                else
-                                    Log.debug("Failed based on identity = #{f}")
-                                    failed += 1
-                                end
+                            if filter[key].include?(Config.instance.identity)
+                                Log.debug("Passing based on identity")
+                                passed += 1
+                            else
+                                Log.debug("Failed based on identity")
+                                failed += 1
                             end
                     end
                 end
