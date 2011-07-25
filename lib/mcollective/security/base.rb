@@ -73,33 +73,33 @@ module MCollective
                             end
 
                         when "compound"
+                            result = []
+
                             filter[key].each do |expression|
-                                result = []
-
                                 case expression.keys.first
-                                when "statement"
-                                    result << Util.eval_compound_statement(expression).to_s
-                                when "and"
-                                    result << "&&"
-                                when "or"
-                                    result << "||"
-                                when "("
-                                    result << "("
-                                when ")"
-                                    result << ")"
-                                when "not"
-                                    result << "!"
+                                    when "statement"
+                                        result << Util.eval_compound_statement(expression).to_s
+                                    when "and"
+                                        result << "&&"
+                                    when "or"
+                                        result << "||"
+                                    when "("
+                                        result << "("
+                                    when ")"
+                                        result << ")"
+                                    when "not"
+                                        result << "!"
                                 end
+                            end
 
-                                result = eval(result.join(" "))
+                            result = eval(result.join(" "))
 
-                                if result
-                                    Log.debug("Passing based on class and fact composition")
-                                    passed +=1
-                                else
-                                    Log.debug("Failing based on class and fact composition")
-                                    failed +=1
-                                end
+                            if result
+                                Log.debug("Passing based on class and fact composition")
+                                passed +=1
+                            else
+                                Log.debug("Failing based on class and fact composition")
+                                failed +=1
                             end
 
                         when "agent"
