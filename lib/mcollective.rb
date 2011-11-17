@@ -56,6 +56,7 @@ module MCollective
   autoload :Applications, "mcollective/applications"
   autoload :Vendor, "mcollective/vendor"
   autoload :Shell, "mcollective/shell"
+  autoload :Translator, "mcollective/translator"
 
   MCollective::Vendor.load_vendored
 

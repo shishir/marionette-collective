@@ -129,6 +129,10 @@ module MCollective
         @options[:reply_to] = v
       end
 
+      @parser.on('--translate TRANSLATOR', 'Translate a reply into a different format') do |v|
+        @options[:translator] = v
+      end
+
       @parser.on('-v', '--verbose', 'Be verbose') do |v|
         @options[:verbose] = v
       end

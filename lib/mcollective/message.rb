@@ -2,7 +2,7 @@ module MCollective
   # container for a message, its headers, agent, collective and other meta data
   class Message
     attr_reader :message, :request, :validated, :msgtime, :payload, :type, :expected_msgid, :reply_to
-    attr_accessor :headers, :agent, :collective, :filter
+    attr_accessor :headers, :agent, :collective, :filter, :translator
     attr_accessor :requestid, :discovered_hosts, :options, :ttl
 
     VALIDTYPES = [:message, :request, :direct_request, :reply]
@@ -36,6 +36,7 @@ module MCollective
       @requestid = nil
       @discovered_hosts = nil
       @reply_to = nil
+      @translator = nil
 
       @type = options[:type]
       @headers = options[:headers]
@@ -113,6 +114,7 @@ module MCollective
 
     def base64_encode!
       return if @base64
+      return if @translator && @reply_to
 
       @body = SSL.base64_encode(@body)
       @base64 = true
@@ -122,7 +124,15 @@ module MCollective
       @base64
     end
 
+    def translate!
+      raise "Can only translate replies if a specific reply-to destination was requested" unless @reply_to
+
+      @payload = Translator[@translator].translate(payload)
+    end
+
     def encode!
+      return translate! if @translator && @reply_to
+
       case type
         when :reply
           raise "Cannot encode a reply message if no request has been associated with it" unless request

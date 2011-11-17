@@ -97,18 +97,18 @@ module MCollective
 
       begin
         case request.payload[:body]
-        when /^stats$/
-          reply(@stats.to_hash, request)
+          when /^stats$/
+            reply(@stats.to_hash, request)
 
-        when /^reload_agent (.+)$/
-          reply("reloaded #{$1} agent", request) if @agents.loadagent($1)
+          when /^reload_agent (.+)$/
+            reply("reloaded #{$1} agent", request) if @agents.loadagent($1)
 
-        when /^reload_agents$/
+          when /^reload_agents$/
 
-          reply("reloaded all agents", request) if @agents.loadagents
+            reply("reloaded all agents", request) if @agents.loadagents
 
-        else
-          Log.error("Received an unknown message to the controller")
+          else
+            Log.error("Received an unknown message to the controller")
 
         end
       rescue Exception => e
