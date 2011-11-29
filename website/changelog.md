@@ -11,12 +11,14 @@ title: Changelog
 
 |Date|Description|Ticket|
 |----|-----------|------|
+|*2011/11/30*|*Release 1.2.2*|11083|
 |2011/11/09|Unsubscribe from topics when we are done with them to optimize use in very busy environments|10670|
+|2011/11/09|Improve logging of connection errors in the Stomp connector|7960|
 |*2011/06/30*|*Release 1.2.1*|8117|
 |2011/06/02|Correct parsing of MCOLLECTIVE_EXTRA_OPTS in cases where no config related settings were set|7755|
 |2011/05/23|Allow applications to use the exit method as would normally be expected|7626|
 |2011/05/16|Allow _._ in fact names|7532|
-|2011/05/16|Fix compatability issues with RH4 init system|7448|
+|2011/05/16|Fix compatibility issues with RH4 init system|7448|
 |2011/05/15|Handle failures from remote nodes better in the inventory app|7524|
 |2011/05/06|Revert unintended changes to the Debian rc script|7420|
 |2011/05/06|Remove the _test_ agent that was accidentally checked in|7425|
@@ -35,7 +37,7 @@ title: Changelog
 |2011/04/19|Abstract the creation of request and reply hashes to simplify connector plugin development|5701|
 |2011/04/15|Improve the shellsafe validator and add a Util method to do shell escaping|7066|
 |2011/04/14|Update Rakefile to have a mail_patches task|6874|
-|2011/04/13|Update vendored systemu library for Ruby 1.9.2 compatability|7067|
+|2011/04/13|Update vendored systemu library for Ruby 1.9.2 compatibility|7067|
 |2011/04/12|Fix failing tests on Ruby 1.9.2|7067|
 |2011/04/11|Update the DDL documentation to reflect the _mco help_ command|7042|
 |2011/04/11|Document the use filters on the CLI|5917|
@@ -68,10 +70,10 @@ title: Changelog
 |*2011/02/14*|*Release 1.1.2*|6303|
 |2011/02/13|Surpress replies to SimpleRPC clients who did not request results|6305|
 |2011/02/11|Fix Debian packaging error due to the same file in multiple packages|6276|
-|2011/02/11|The application framework will now disconnect from the middleware for consistancy|6292|
+|2011/02/11|The application framework will now disconnect from the middleware for consistency|6292|
 |2011/02/11|Returning _nil_ from a registration plugin will skip registration|6289|
 |2011/02/11|Set loglevel to warn by default if not specified in the config file|6287|
-|2011/02/10|Fix backward compatability with empty fact strings|6278|
+|2011/02/10|Fix backward compatibility with empty fact strings|6278|
 |*2011/02/07*|*Release 1.1.1*|6080|
 |2011/02/02|Load the DDL from disk once per printrpc call and not for every result|5958|
 |2011/02/02|Include full Apache 2 license text|6113|
@@ -109,7 +111,7 @@ title: Changelog
 |2010/12/13|Add a console logger|5537|
 |2010/12/13|Logging is now plugable and a syslog plugin was provided|5082|
 |2010/12/13|Allow libdir to be an array of directories for agents and ddl files|5253|
-|2010/12/13|The progress bar will now intelligently figure out the terminal dimentions|5524|
+|2010/12/13|The progress bar will now intelligently figure out the terminal dimensions|5524|
 
 ## Version 1.0.x
 
@@ -166,7 +168,7 @@ title: Changelog
 |2010/08/23|Fix permissions in the RPM for files in /etc|123|
 |2010/08/23|Fix language in two error messages|122|
 |*2010/08/20*|*Release version 0.4.8*| |
-|2010/08/19|Fix missing help template in debian packages|90|
+|2010/08/19|Fix missing help template in Debian packages|90|
 |2010/08/18|Clean up some hardlink warnings in the Rakefile|117|
 |2010/08/18|Include the website in the main repo and add a simple Rake task|118|
 |2010/08/17|Handle exceptions for missing plugins better|115|
