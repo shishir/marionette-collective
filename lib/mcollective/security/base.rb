@@ -60,85 +60,85 @@ module MCollective
 
         filter.keys.each do |key|
           case key
-          when /puppet_class|cf_class/
-            filter[key].each do |f|
-              Log.debug("Checking for class #{f}")
-              if Util.has_cf_class?(f) then
-                Log.debug("Passing based on configuration management class #{f}")
-                passed += 1
-              else
-                Log.debug("Failing based on configuration management class #{f}")
-                failed += 1
-              end
-            end
-
-          when "compound"
-            filter[key].each do |compound|
-              result = []
-
-              compound.each do |expression|
-                case expression.keys.first
-                when "statement"
-                  result << Util.eval_compound_statement(expression).to_s
-                when "and"
-                  result << "&&"
-                when "or"
-                  result << "||"
-                when "("
-                  result << "("
-                when ")"
-                  result << ")"
-                when "not"
-                  result << "!"
+            when /puppet_class|cf_class/
+              filter[key].each do |f|
+                Log.debug("Checking for class #{f}")
+                if Util.has_cf_class?(f) then
+                  Log.debug("Passing based on configuration management class #{f}")
+                  passed += 1
+                else
+                  Log.debug("Failing based on configuration management class #{f}")
+                  failed += 1
                 end
               end
 
-              result = eval(result.join(" "))
+            when "compound"
+              filter[key].each do |compound|
+                result = []
 
-              if result
-                Log.debug("Passing based on class and fact composition")
-                passed +=1
-              else
-                Log.debug("Failing based on class and fact composition")
-                failed +=1
+                compound.each do |expression|
+                  case expression.keys.first
+                  when "statement"
+                    result << Util.eval_compound_statement(expression).to_s
+                  when "and"
+                    result << "&&"
+                  when "or"
+                    result << "||"
+                  when "("
+                    result << "("
+                  when ")"
+                    result << ")"
+                  when "not"
+                    result << "!"
+                  end
+                end
+
+                result = eval(result.join(" "))
+
+                if result
+                  Log.debug("Passing based on class and fact composition")
+                  passed +=1
+                else
+                  Log.debug("Failing based on class and fact composition")
+                  failed +=1
+                end
               end
-            end
 
-          when "agent"
-            filter[key].each do |f|
-              if Util.has_agent?(f) || f == "mcollective"
-                Log.debug("Passing based on agent #{f}")
-                passed += 1
-              else
-                Log.debug("Failing based on agent #{f}")
-                failed += 1
+            when "agent"
+              filter[key].each do |f|
+                if Util.has_agent?(f) || f == "mcollective"
+                  Log.debug("Passing based on agent #{f}")
+                  passed += 1
+                else
+                  Log.debug("Failing based on agent #{f}")
+                  failed += 1
+                end
               end
-            end
 
-          when "fact"
-            filter[key].each do |f|
-              if Util.has_fact?(f[:fact], f[:value], f[:operator])
-                Log.debug("Passing based on fact #{f[:fact]} #{f[:operator]} #{f[:value]}")
-                passed += 1
-              else
-                Log.debug("Failing based on fact #{f[:fact]} #{f[:operator]} #{f[:value]}")
-                failed += 1
+            when "fact"
+              filter[key].each do |f|
+                if Util.has_fact?(f[:fact], f[:value], f[:operator])
+                  Log.debug("Passing based on fact #{f[:fact]} #{f[:operator]} #{f[:value]}")
+                  passed += 1
+                else
+                  Log.debug("Failing based on fact #{f[:fact]} #{f[:operator]} #{f[:value]}")
+                  failed += 1
+                end
               end
-            end
 
-          when "identity"
-            unless filter[key].empty?
-              # Identity filters should not be 'and' but 'or' as each node can only have one identity
-              matched = filter[key].select{|f| Util.has_identity?(f)}.size
+            when "identity"
+              unless filter[key].empty?
+                # Identity filters should not be 'and' but 'or' as each node can only have one identity
+                matched = filter[key].select{|f| Util.has_identity?(f)}.size
 
-              if matched == 1
-                Log.debug("Passing based on identity")
-                passed += 1
-              else
-                Log.debug("Failed based on identity")
-                failed += 1
+                if matched == 1
+                  Log.debug("Passing based on identity")
+                  passed += 1
+                else
+                  Log.debug("Failed based on identity")
+                  failed += 1
+                end
               end
-            end
           end
         end
 
@@ -161,24 +161,24 @@ module MCollective
         Log.debug("Encoded a message for request #{reqid}")
 
         {:senderid => @config.identity,
-          :requestid => reqid,
-          :senderagent => agent,
-          :msgtime => Time.now.utc.to_i,
-          :body => body}
+         :requestid => reqid,
+         :senderagent => agent,
+         :msgtime => Time.now.utc.to_i,
+         :body => body}
       end
 
       def create_request(reqid, filter, msg, initiated_by, target_agent, target_collective, ttl=60)
         Log.debug("Encoding a request for agent '#{target_agent}' in collective #{target_collective} with request id #{reqid}")
 
         {:body => msg,
-          :senderid => @config.identity,
-          :requestid => reqid,
-          :filter => filter,
-          :collective => target_collective,
-          :agent => target_agent,
-          :callerid => callerid,
-          :ttl => ttl,
-          :msgtime => Time.now.utc.to_i}
+         :senderid => @config.identity,
+         :requestid => reqid,
+         :filter => filter,
+         :collective => target_collective,
+         :agent => target_agent,
+         :callerid => callerid,
+         :ttl => ttl,
+         :msgtime => Time.now.utc.to_i}
       end
 
       # Give a MC::Message instance and a message id this will figure out if you the incoming

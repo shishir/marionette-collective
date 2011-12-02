@@ -33,7 +33,6 @@ module MCollective
   class MsgTTLExpired<RuntimeError;end
   class MsgDoesNotMatchRequestID < RuntimeError; end
 
-
   autoload :Config, "mcollective/config"
   autoload :Log, "mcollective/log"
   autoload :Logger, "mcollective/logger"
@@ -55,6 +54,7 @@ module MCollective
   autoload :Application, "mcollective/application"
   autoload :Applications, "mcollective/applications"
   autoload :Vendor, "mcollective/vendor"
+  autoload :Versionable, "mcollective/versionable"
   autoload :Shell, "mcollective/shell"
 
   MCollective::Vendor.load_vendored
