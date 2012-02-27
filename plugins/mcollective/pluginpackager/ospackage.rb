@@ -27,14 +27,15 @@ module MCollective
         @agent = false
         @application = false
         @iteration = "1"
-        @vendor = "Unknown"
+        @vendor = "Puppet Labs"
         @target_dir = nil
+        @packagename = nil
       end
 
       # Creates all defined packages
       def create_package
         @meta = create_metadata
-        @packagename = @meta[:name]
+        @packagename = @meta[:name] unless @packagename
         identify_packages
         #TODO: Deal with fpm output
         create_dependencies if @dependencies
@@ -45,13 +46,17 @@ module MCollective
       # Displays information relative to the package.
       def package_information
         @meta = create_metadata
-        @packagename = @meta[:name]
+        @packagename = @meta[:name] unless @packagename
         puts "\nPackage information : #{@packagename}"
         puts "---------"
         puts "Output format : #{@package_type}"
         @meta.each do |k, v|
           puts "#{k} : #{v}"
         end
+        puts
+        puts "Iteration : #{@iteration}"
+        puts "Vendor : #{@vendor}"
+        puts "Post install script : #{(@postinstall) ? @postinstall : "None"}"
 
         puts
         puts "Files included in package :"
