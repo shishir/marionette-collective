@@ -30,6 +30,27 @@ module MCollective
         (File.open("#{@tmp_dir}/mcollective-#{@packagename}-#{@packagetype}.gemspec", "w") <<  specfile.result(self.get_binding)).close
         %x[gem build "#{@tmp_dir}/mcollective-#{@packagename}-#{@packagetype}.gemspec" --quiet]
       end
+
+      def package_information
+        puts "Package information : #{@packagename}"
+        puts "--------------------"
+        puts "Output format : Gem"
+        puts "License : #{@meta[:license]}"
+        puts "Author : #{@meta[:author]}"
+        puts "Version : #{@meta[:version]}"
+        puts "Dependencies : mcollective-#{@packagename}-common" if @dependencies
+        if @meta[:author] =~ /^.*(\<)(.*)(\>)$/
+          puts "Email : #{$2}"
+        end
+        puts "Description : #{@meta[:description]}"
+        puts "Summary : #{@meta[:description].first}"
+        puts "Homepage : #{@meta[:url]}"
+        puts "Files included in gem :"
+        Dir.glob("#{@target_dir}**/*").each do |file|
+          puts "\t#{file}"
+        end
+
+      end
     end
   end
 end
