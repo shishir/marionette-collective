@@ -1,0 +1,18 @@
+Gem::Specification.new do |s|
+  s.rubyforge_project = "nowarning"
+  s.name = "mcollective-<%= @packagename %>-<%= @packagetype%>"
+  s.license = "<%= @license %>"
+  s.author = "<%= @meta[:author]%>"
+  s.version = "<%= @meta[:version]%>"
+  s.date = %q{<%= Date.today %>}
+  <% if @dependencies && @packagetype != "common"%>
+    s.add_dependency("mcollective-<%= @packagename%>-common")
+  <% end %>
+  <% if @meta[:author] =~ /^.*(\<)(.*)(\>)$/ %>
+    s.email = "<%= $2%>"
+  <% end %>
+  s.description = "<%= @meta[:description]%>"
+  s.files = [Dir.glob("agent/**"), Dir.glob("application/**")].flatten
+  s.homepage = "<%= @meta[:url]%>"
+  s.summary = s.description.first
+end

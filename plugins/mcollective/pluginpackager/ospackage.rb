@@ -8,7 +8,7 @@ module MCollective
       require 'facter'
 
       attr_accessor :packagename, :postinstall, :tmp_dir, :libdir, :meta
-      attr_accessor :dependencies, :agent, :appplication, :iteration, :vendor
+      attr_accessor :dependencies, :agent, :application, :iteration, :vendor
       attr_accessor :target_dir
 
       def initialize
@@ -48,7 +48,7 @@ module MCollective
         @meta = create_metadata
         @packagename = @meta[:name] unless @packagename
         puts "\nPackage information : #{@packagename}"
-        puts "---------"
+        puts "-----------------------"
         puts "Output format : #{@package_type}"
         @meta.each do |k, v|
           puts "#{k} : #{v}"
