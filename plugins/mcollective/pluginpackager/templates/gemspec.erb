@@ -12,7 +12,8 @@ Gem::Specification.new do |s|
     s.email = "<%= $2%>"
   <% end %>
   s.description = "<%= @meta[:description]%>"
-  s.files = [Dir.glob("agent/**"), Dir.glob("application/**")].flatten
+  s.files = [Dir.glob("lib/mcollective/<%= (@packagetype == "common") ? "util" : @packagetype %>/*")].flatten
   s.homepage = "<%= @meta[:url]%>"
   s.summary = s.description.first
+  s.require_paths = ["lib"]
 end

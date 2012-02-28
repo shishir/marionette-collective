@@ -1,9 +1,7 @@
-# The Marionette Collective Packge Tool
-#
-# Basic implementaion of Os package creation.
 module MCollective
   module PluginPackager
     class Ospackage < PluginPackager::Base
+
       require 'fpm/program'
       require 'facter'
 
@@ -12,7 +10,6 @@ module MCollective
       attr_accessor :target_dir
 
       def initialize
-
         if Facter.value("osfamily").downcase == "redhat"
           @libdir = "usr/libexec/mcollective/mcollective/"
           @package_type = "rpm"
@@ -21,21 +18,15 @@ module MCollective
           @package_type = "deb"
         end
 
-        @postinstall = nil
         @tmp_dir = Dir.mktmpdir("mcollective_plugin_packager")
-        @dependencies = false
-        @agent = false
-        @application = false
         @iteration = "1"
         @vendor = "Puppet Labs"
-        @target_dir = nil
-        @packagename = nil
+        @meta = create_metadata
+        @packagename = @meta[:name] unless @packagename
       end
 
       # Creates all defined packages
       def create_package
-        @meta = create_metadata
-        @packagename = @meta[:name] unless @packagename
         identify_packages
         #TODO: Deal with fpm output
         create_dependencies if @dependencies
@@ -43,27 +34,6 @@ module MCollective
         FPM::Program.new.run params("client") if @application
       end
 
-      # Displays information relative to the package.
-      def package_information
-        @meta = create_metadata
-        @packagename = @meta[:name] unless @packagename
-        puts "\nPackage information : #{@packagename}"
-        puts "-----------------------"
-        puts "Output format : #{@package_type}"
-        @meta.each do |k, v|
-          puts "#{k} : #{v}"
-        end
-        puts
-        puts "Iteration : #{@iteration}"
-        puts "Vendor : #{@vendor}"
-        puts "Post install script : #{(@postinstall) ? @postinstall : "None"}"
-
-        puts
-        puts "Files included in package :"
-        Dir.glob("#{@target_dir}**/*").each do |file|
-          puts "\t#{file}"
-        end
-      end
 
       # Creates the common package for other packages to depend on
       def create_dependencies
@@ -92,7 +62,7 @@ module MCollective
       def standard_flags(dir = "common")
         params = ["-s", "dir", "-C", @tmp_dir, "-t", @package_type, "-a",
           "all", "-n", "mcollective-#{@packagename}-#{dir}", "-v",
-          @meta[:version], "--iteration", @iteration]
+        @meta[:version], "--iteration", @iteration]
       end
 
       # Meta data from mcollective
@@ -103,7 +73,7 @@ module MCollective
       end
 
       # Package dependencies on specific parts of mcollective
-      # TODO: Consider moving this up to package when we've added more complex plugin types
+      # TODO: This sucks. Move it later when we add package types
       def mcollective_dependencies(package_type)
         case package_type
         when 'agent'
@@ -116,6 +86,40 @@ module MCollective
           raise "Invalid package"
         end
       end
+
+      # Displays information relative to the package.
+      def package_information
+
+        info = %Q[
+        Plugin information : #{@packagename}
+        ------------------------------------
+              Outputformat : #{@package_type.upcase}
+                   Version : #{@meta[:version]}
+                 Iteration : #{@iteration}
+                    Vendor : #{@vendor}
+       Post Install Script : #{@postinstall ? @postinstall : "None"}
+                    Author : #{@meta[:author]}
+                   License : #{@meta[:license]}
+                       Url : #{@meta[:url]}
+                 Agent #{@package_type.upcase} Contents : #{package_contents("agent")}
+                 Client #{@package_type.upcase} Contents : #{package_contents("application")}
+                 Common #{@package_type.upcase} Contents : #{package_contents("util")}
+        ]
+
+        puts info
+      end
+
+      def package_contents(package)
+        contents = Dir.glob("#{@target_dir}#{package}/**")
+        if contents.size == 0
+          "Not present"
+        elsif contents.size == 1
+          contents
+        else
+          "[#{contents.join(", ")}]"
+        end
+      end
+
     end
   end
 end

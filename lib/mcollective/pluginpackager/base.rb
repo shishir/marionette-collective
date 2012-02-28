@@ -8,9 +8,9 @@ module MCollective
       require 'tmpdir'
 
       def identify_packages
-        prepare_package :common if File.directory?(File.join(Dir.pwd, "util"))
-        prepare_package :agent if File.directory?(File.join(Dir.pwd, "agent"))
-        prepare_package :application if File.directory?(File.join(Dir.pwd, "application"))
+        prepare_package :common if check_dir "util"
+        prepare_package :agent if check_dir "agent"
+        prepare_package :application if check_dir "application"
       end
 
       def clean_up
@@ -43,6 +43,10 @@ module MCollective
         @meta = ddl.meta
         rescue
           raise "Could not read agent DDL File"
+      end
+
+      def check_dir(dir)
+        File.directory?(File.join(Dir.pwd, dir)) && !Dir.glob(File.join(Dir.pwd, dir) + "/*").empty?
       end
     end
   end
