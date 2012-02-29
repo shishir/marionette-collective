@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.rubyforge_project = "nowarning"
-  s.name = "mcollective-<%= @packagename %>-<%= @packagetype%>"
+  s.name = "mcollective-<%= @packagename %>-<%= @package_names[@packagetype]%>"
   s.license = "<%= @license %>"
   s.author = "<%= @meta[:author]%>"
   s.version = "<%= @meta[:version]%>"
@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   <% if @meta[:author] =~ /^.*(\<)(.*)(\>)$/ %>
     s.email = "<%= $2%>"
   <% end %>
-  s.description = "<%= @meta[:description]%>"
+  s.description = "<%= @meta[:description]%>\n<%= package_description @packagetype%>"
   s.files = [Dir.glob("lib/mcollective/<%= (@packagetype == "common") ? "util" : @packagetype %>/*")].flatten
   s.homepage = "<%= @meta[:url]%>"
   s.summary = s.description.first

@@ -5,6 +5,26 @@ module MCollective
     def rpcoptions
       oparser = MCollective::Optionparser.new({:verbose => false, :progress_bar => true}) #removed filters param
 
+      def oparser.parse
+        yield(@parser, @options) if block_given?
+
+        [@include].flatten.compact.each do |i|
+          options_name = "add_#{i}_options"
+          send(options_name)  if respond_to?(options_name)
+        end
+
+        @parser.environment("MCOLLECTIVE_EXTRA_OPTS")
+        @parser.on('-c', '--config FILE', 'Load configuratuion from file rather than default') do |f|
+          @options[:config] = f
+        end
+
+        @parser.parse!
+
+        @options[:collective] = Config.instance.main_collective unless @options.include?(:collective)
+
+        @options
+      end
+
       options = oparser.parse do |parser, options|
         if block_given?
           yield(parser, options)
@@ -15,6 +35,12 @@ module MCollective
     attr_accessor :package_plugin
 
     description "MCollective Plugin Application"
+    usage <<-END_OF_USAGE
+mco plugin [info|package] [options] <directory>
+
+   info : Display plugin information including package details.
+package : Create all available plugin packages.
+    END_OF_USAGE
 
     option  :packagename,
     :description => "Package name",
@@ -36,9 +62,9 @@ module MCollective
       :arguments => ["--vendor VENDOR"],
       :type => String
 
-    option  :ptype,
+    option  :format,
       :description => "Package output format. Defaults to rpm or deb",
-      :arguments => ["--ptype OUTPUTFORMAT"],
+      :arguments => ["--format OUTPUTFORMAT"],
       :type => String
 
     # Handle alternative format that optparser can't parse.
@@ -72,11 +98,11 @@ module MCollective
 
     # Identifies and returns the correct plugin to be used for packaging.
     def package_plugin
-      if configuration[:ptype]
+      if configuration[:format]
         begin
-          MCollective::PluginManager["#{configuration[:ptype]}package_packager"]
+          MCollective::PluginManager["#{configuration[:format]}package_packager"]
         rescue Exception => e
-          raise "Cannot load plugin - #{configuration[:ptype]}"
+          raise "Cannot load plugin - #{configuration[:format]}"
         end
       else
         MCollective::PluginManager["ospackage_packager"]
@@ -88,7 +114,6 @@ module MCollective
     def package_info
       prepare_package
       @package_plugin.package_information
-      @package_plugin.clean_up
     end
 
     # Creates a package. Note that all package inplementations must must implement
@@ -96,7 +121,6 @@ module MCollective
     def create_package
       prepare_package
       @package_plugin.create_package
-      @package_plugin.clean_up
     end
 
     # Sets package plugin instance variables based on values parsed by optparse.

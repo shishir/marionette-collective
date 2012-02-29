@@ -2,6 +2,9 @@ module MCollective
   module PluginPackager
     class Ospackage < PluginPackager::Base
 
+      #TODO: Update to > 0.3.11 when Sissel pushed new version
+      gem 'fpm', '>= 0.3.11'
+
       require 'fpm/program'
       require 'facter'
 
@@ -10,34 +13,35 @@ module MCollective
       attr_accessor :target_dir
 
       def initialize
-        if Facter.value("osfamily").downcase == "redhat"
+        osfamily = Facter.value("osfamily")
+
+        unless osfamily
+          abort "Missing osfamily fact. Newer version of facter needed"
+        end
+
+        if osfamily.downcase == "redhat"
           @libdir = "usr/libexec/mcollective/mcollective/"
           @package_type = "rpm"
-        elsif Facter.value("osfamily").downcase == "debian"
+        elsif osfamily.downcase == "debian"
           @libdir = "usr/share/mcollective/plugins/mcollective"
           @package_type = "deb"
         end
 
-        @tmp_dir = Dir.mktmpdir("mcollective_plugin_packager")
         @iteration = "1"
         @vendor = "Puppet Labs"
         @meta = create_metadata
-        @packagename = @meta[:name] unless @packagename
+        @packagename = @meta[:name].downcase.gsub(" ", "_")
       end
 
       # Creates all defined packages
       def create_package
-        identify_packages
-        #TODO: Deal with fpm output
-        create_dependencies if @dependencies
-        FPM::Program.new.run params("agent") if @agent
-        FPM::Program.new.run params("client") if @application
-      end
-
-
-      # Creates the common package for other packages to depend on
-      def create_dependencies
-        FPM::Program.new.run dep_params
+        packages.each do |package|
+          if check_dir package
+            prepare_package package
+            ::FPM::Program.new.run params(package)
+            clean_up
+          end
+        end
       end
 
       # Construct parameter array used by fpm for standard packages
@@ -46,28 +50,22 @@ module MCollective
         params += mcollective_dependencies(dir)
         params += ["-d", "mcollective-#{@packagename}-common >= #{@meta[:version]}"] if @dependencies
         params += ["--post-install", @postinstall] if @postinstall
-        params += metadata
-        params << File.join(@libdir, (dir == "client") ? "application" : dir)
-      end
-
-      # Constructs parameter array
-      def dep_params
-        params = standard_flags
-        params += metadata
-        params += mcollective_dependencies('common')
-        params << File.join(@libdir, "util")
+        params += metadata(dir)
+        params += package_dirs(dir)
       end
 
       # Options common to all type of rpm packages created by fpm
-      def standard_flags(dir = "common")
+      def standard_flags(dir)
+        # TODO:Fix this hash crap when build works
+        package_names = {"application" => "client", "agent" => "agent", "util" => "common"}
         params = ["-s", "dir", "-C", @tmp_dir, "-t", @package_type, "-a",
-          "all", "-n", "mcollective-#{@packagename}-#{dir}", "-v",
+          "all", "-n", "mcollective-#{@packagename}-#{package_names[dir]}", "-v",
         @meta[:version], "--iteration", @iteration]
       end
 
       # Meta data from mcollective
-      def metadata
-        ["--url", @meta[:url], "--description", @meta[:description],
+      def metadata(dir)
+        ["--url", @meta[:url], "--description", @meta[:description] + "\n#{package_description(dir)}",
         "--license", @meta[:license],
         "--maintainer", @meta[:author], "--vendor", @vendor]
       end
@@ -78,9 +76,9 @@ module MCollective
         case package_type
         when 'agent'
           return ["-d", "mcollective"]
-        when 'client'
+        when 'application', "client"
           return ["-d", "mcollective-client"]
-        when 'common'
+        when 'common', "util"
           return ["-d", "mcollective-common"]
         else
           raise "Invalid package"
@@ -89,7 +87,6 @@ module MCollective
 
       # Displays information relative to the package.
       def package_information
-
         info = %Q[
         Plugin information : #{@packagename}
         ------------------------------------
@@ -101,23 +98,13 @@ module MCollective
                     Author : #{@meta[:author]}
                    License : #{@meta[:license]}
                        Url : #{@meta[:url]}
-                 Agent #{@package_type.upcase} Contents : #{package_contents("agent")}
-                 Client #{@package_type.upcase} Contents : #{package_contents("application")}
-                 Common #{@package_type.upcase} Contents : #{package_contents("util")}
+
+        Agent #{@package_type.upcase} Contents : #{package_contents("agent").join(", ")}
+       Client #{@package_type.upcase} Contents : #{package_contents("application").join(", ")}
+       Common #{@package_type.upcase} Contents : #{package_contents("util").join(", ")}
         ]
 
         puts info
-      end
-
-      def package_contents(package)
-        contents = Dir.glob("#{@target_dir}#{package}/**")
-        if contents.size == 0
-          "Not present"
-        elsif contents.size == 1
-          contents
-        else
-          "[#{contents.join(", ")}]"
-        end
       end
 
     end
