@@ -65,7 +65,7 @@ module MCollective
 
       # Meta data from mcollective
       def metadata(dir)
-        ["--url", @meta[:url], "--description", @meta[:description] + "\n#{package_description(dir)}",
+        ["--url", @meta[:url], "--description", @meta[:description] + "\n\n#{package_description(dir)}",
         "--license", @meta[:license],
         "--maintainer", @meta[:author], "--vendor", @vendor]
       end
@@ -90,14 +90,14 @@ module MCollective
         info = %Q[
         Plugin information : #{@packagename}
         ------------------------------------
-              Outputformat : #{@package_type.upcase}
+              Output Format : #{@package_type.upcase}
                    Version : #{@meta[:version]}
                  Iteration : #{@iteration}
                     Vendor : #{@vendor}
        Post Install Script : #{@postinstall ? @postinstall : "None"}
                     Author : #{@meta[:author]}
                    License : #{@meta[:license]}
-                       Url : #{@meta[:url]}
+                       URL : #{@meta[:url]}
 
         Agent #{@package_type.upcase} Contents : #{package_contents("agent").join(", ")}
        Client #{@package_type.upcase} Contents : #{package_contents("application").join(", ")}

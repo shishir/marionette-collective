@@ -50,7 +50,7 @@ module MCollective
         info = %Q[
           Plugin information : #{@packagename}
           -------------------------------------
-                Outputformat : Gem
+                Output Format : Gem
                      License : #{@meta[:license]}
                       Author : #{@meta[:author]}
                      Version : #{@meta[:version]}
