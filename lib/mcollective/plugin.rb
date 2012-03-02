@@ -6,10 +6,10 @@ module MCollective
 
   class Plugins
 
-    def initialize
+    def initialize(pluginpackagers = [])
       @config = Config.instance
-      @packagers = []
-      raise("Configuration has not been loaded, can't load package plugins") unless @config
+      @packagers = pluginpackagers
+      raise("Configuration has not been loaded, can't load package plugins") unless @config.configured
 
       load_packagers
     end

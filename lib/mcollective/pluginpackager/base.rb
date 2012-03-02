@@ -30,7 +30,7 @@ module MCollective
           #one file. Currently packaging ddl's with clients
           FileUtils.mkdir File.join(working_dir, "agent")
           ddls = Dir.glob("#{@target_dir}**/*.ddl")
-          FileUtils.cp(Dir.glob("#{@target_dir}agent)**/*") - ddls, File.join(working_dir, "agent"))
+          FileUtils.cp(Dir.glob("#{@target_dir}**/*") - ddls, File.join(working_dir, "agent"))
           @agent = true
         when "application", "client"
           FileUtils.cp_r "#{@target_dir}application", working_dir
