@@ -1,39 +1,6 @@
 module MCollective
   class Application::Plugin<Application
 
-    #Overriden rpcoptions removes standard mcollective flags. TODO:Make a ticket for RIP to change in MCollective
-    def rpcoptions
-      oparser = MCollective::Optionparser.new({:verbose => false, :progress_bar => true}) #removed filters param
-
-      def oparser.parse
-        yield(@parser, @options) if block_given?
-
-        [@include].flatten.compact.each do |i|
-          options_name = "add_#{i}_options"
-          send(options_name)  if respond_to?(options_name)
-        end
-
-        @parser.environment("MCOLLECTIVE_EXTRA_OPTS")
-        @parser.on('-c', '--config FILE', 'Load configuratuion from file rather than default') do |f|
-          @options[:config] = f
-        end
-
-        @parser.parse!
-
-        @options[:collective] = Config.instance.main_collective unless @options.include?(:collective)
-
-        @options
-      end
-
-      options = oparser.parse do |parser, options|
-        if block_given?
-          yield(parser, options)
-        end
-      end
-    end
-
-    attr_accessor :package_plugin
-
     description "MCollective Plugin Application"
     usage <<-END_OF_USAGE
 mco plugin [info|package] [options] <directory>
@@ -42,8 +9,8 @@ mco plugin [info|package] [options] <directory>
 package : Create all available plugin packages.
     END_OF_USAGE
 
-    option  :packagename,
-    :description => "Package name",
+    option  :pluginname,
+    :description => "Plugin name",
     :arguments => ["-n", "--name NAME"],
     :type => String
 
@@ -67,6 +34,11 @@ package : Create all available plugin packages.
       :arguments => ["--format OUTPUTFORMAT"],
       :type => String
 
+    option :plugintype,
+      :description => "Plugin type.",
+      :arguments => ["--plugintype PLUGINTYPE"],
+      :type => String
+
     # Handle alternative format that optparser can't parse.
     def post_option_parser(configuration)
       if ARGV.length >= 1
@@ -75,70 +47,39 @@ package : Create all available plugin packages.
         if ARGV[0]
           configuration[:target] = ARGV[0]
           ARGV.delete_at(0)
+        else
+          configuration[:target] = "."
         end
       end
     end
 
     def main
       raise "No action specified" unless configuration.include? :action
-
-      MCollective::Plugins.new
-
-      @package_plugin = package_plugin
+      set_plugin_type unless configuration[:plugintype]
+      plugin_class = MCollective::PluginPackager.const_get(configuration[:plugintype].capitalize)
+      configuration[:format] = "ospackage" unless configuration[:format]
+      packager = MCollective::PluginPackager.const_get(configuration[:format].capitalize)
+      plugin = plugin_class.new(configuration[:target], configuration[:pluginname], configuration[:vendor],
+                               configuration[:postinstall], configuration[:iteration])
 
       case configuration[:action]
-      when "package"
-        create_package
       when "info"
-        package_info
+        packager.new(plugin).package_information
+      when "package"
+        packager.new(plugin).create_packages
       else
-        raise "#{configuration[:action]} is not a valid action for Plugin application."
+        abort "error: actions are [info|package]"
       end
     end
 
-    # Identifies and returns the correct plugin to be used for packaging.
-    def package_plugin
-      if configuration[:format]
-        begin
-          MCollective::PluginManager["#{configuration[:format]}package_packager"]
-        rescue Exception => e
-          raise "Cannot load plugin - #{configuration[:format]}"
-        end
-      else
-        MCollective::PluginManager["ospackage_packager"]
+    # Identify plugin type if not provided.
+    # TODO : Add more plugin types as we identify them
+    def set_plugin_type
+      if File.directory?(File.join(configuration[:target], "agent")) ||
+        File.directory?(File.join(configuration[:target], "application"))
+        configuration[:plugintype] = "agent"
       end
     end
 
-    # Displays package information. Note that all package implementations must implement
-    # package_information()
-    def package_info
-      prepare_package
-      @package_plugin.package_information
-    end
-
-    # Creates a package. Note that all package inplementations must must implement
-    # create_package()
-    def create_package
-      prepare_package
-      @package_plugin.create_package
-    end
-
-    # Sets package plugin instance variables based on values parsed by optparse.
-    def prepare_package
-      @package_plugin.packagename = configuration[:packagename] if configuration[:packagename]
-      @package_plugin.postinstall = configuration[:postinstall] if configuration[:postinstall]
-      @package_plugin.iteration = configuration[:iteration] if configuration[:iteration]
-      @package_plugin.vendor = configuration[:vendor] if configuration[:vendor]
-      @package_plugin.target_dir = target if configuration[:target]
-    end
-
-    # Appends '/' to the target directory if missing
-    def target
-      if configuration[:target] =~ /^.*\/$/
-        configuration[:target]
-      else
-        configuration[:target] += "/"
-      end
-    end
   end
 end

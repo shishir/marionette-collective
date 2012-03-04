@@ -59,6 +59,7 @@ module MCollective
   autoload :Vendor, "mcollective/vendor"
   autoload :Shell, "mcollective/shell"
   autoload :Plugins, "mcollective/plugin"
+  autoload :PluginPackager, "mcollective/pluginpackager"
 
   MCollective::Vendor.load_vendored
 
