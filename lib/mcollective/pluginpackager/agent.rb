@@ -1,6 +1,6 @@
-# MCollective Agent Plugin package
 module MCollective
   module PluginPackager
+    # MCollective Agent Plugin package
     class Agent
       attr_accessor :path, :packagedata, :metadata, :target_path, :vendor, :iteration, :postinstall
 
@@ -8,8 +8,7 @@ module MCollective
         @path = path
         @packagedata = {:client => nil,
                         :agent => nil,
-                        :common => nil
-                        }
+                        :common => nil}
         @iteration = iteration || 1
         @postinstall = postinstall
         @vendor = vendor || "Puppet Labs"
@@ -29,21 +28,27 @@ module MCollective
 
       # Obtain Agent package files and dependencies.
       def agent
-        agent = {:files => [], :dependencies => ["mcollective"],
-          :description => "Agent plugin for #{@metadata[:name]}"}
+        agent = {:files => [],
+                 :dependencies => ["mcollective"],
+                 :description => "Agent plugin for #{@metadata[:name]}"}
+
         agentdir = File.join(@path, "agent")
+
         if check_dir agentdir
           ddls = Dir.glob "#{agentdir}/*.ddl"
           agent[:files] = (Dir.glob("#{agentdir}/*") - ddls)
         end
-        agent[:dependencies] << "mcollective-#{@metadata[:name]}-common" unless @packagedata[:common].nil?
+
+        agent[:dependencies] << "mcollective-#{@metadata[:name]}-common" if @packagedata[:common]
         agent
       end
 
       # Obtain client package files and dependencies.
       def client
-        client = {:files => [], :dependencies => ["mcollective-client"],
-          :description => "Client plugin for #{@metadata[:name]}"}
+        client = {:files => [],
+                  :dependencies => ["mcollective-client"],
+                  :description => "Client plugin for #{@metadata[:name]}"}
+
         clientdir = File.join(@path, "application")
         bindir = File.join(@path, "bin")
         ddldir = File.join(@path, "agent")
@@ -51,14 +56,16 @@ module MCollective
         client[:files] += Dir.glob("#{clientdir}/*") if check_dir clientdir
         client[:files] += Dir.glob("#{bindir}/*") if check_dir bindir
         client[:files] += Dir.glob("#{ddldir}/*.ddl") if check_dir ddldir
-        client[:dependencies] << "mcollective-#{@metadata[:name]}-common" unless @packagedata[:common].nil?
+        client[:dependencies] << "mcollective-#{@metadata[:name]}-common" if @packagedata[:common]
         client
       end
 
       # Obtain common package files and dependencies.
       def common
-        common = {:files =>[], :dependencies => ["mcollective-common"],
-          :description => "Common libraries for #{@metadata[:name]}"}
+        common = {:files =>[],
+                  :dependencies => ["mcollective-common"],
+                  :description => "Common libraries for #{@metadata[:name]}"}
+
         commondir = File.join(@path, "util")
         common[:files] += Dir.glob("#{commondir}/*") if check_dir commondir
         common
