@@ -1,7 +1,6 @@
-# MCollective plugin packager general OS implementation.
 module MCollective
   module PluginPackager
-
+    # MCollective plugin packager general OS implementation.
     class Ospackage
       gem 'fpm', '>= 0.3.11' # TODO: Update to 0.3.12 when Sissel pushes new version of fpm
 
@@ -14,12 +13,9 @@ module MCollective
       # Create packager object with package parameter containing list of files,
       # dependencies and package metadata
       def initialize(package)
-
         osfamily = Facter.value("osfamily")
 
-        unless osfamily
-          abort "Missing osfamily fact. Newer version of facter needed"
-        end
+        abort "Missing osfamily fact. Newer version of facter needed" unless osfamily
 
         if osfamily.downcase == "redhat"
           @libdir = "usr/libexec/mcollective/mcollective/"
@@ -74,8 +70,9 @@ module MCollective
 
       # Standard list of FPM parameters
       def standard_params(type)
-        ["-s", "dir", "-C", @tmpdir, "-t", @package_type, "-a", "all", "-n", "mcollective-#{@package.metadata[:name]}-#{type}",
-          "-v", @package.metadata[:version], "--iteration", @package.iteration.to_s]
+        ["-s", "dir", "-C", @tmpdir, "-t", @package_type, "-a", "all", "-n",
+         "mcollective-#{@package.metadata[:name]}-#{type}", "-v",
+          @package.metadata[:version], "--iteration", @package.iteration.to_s]
       end
 
       # Dependencies on other packages in the mcollective package type (Like Agent)
@@ -109,7 +106,7 @@ module MCollective
       end
 
       def package_information
-        info = %Q[
+        print %Q[
         Plugin information : #{@package.metadata[:name]}
         ------------------------------------------------
                Plugin Type : #{@package.class.to_s.gsub(/^.*::/, "")}
@@ -128,15 +125,13 @@ module MCollective
         @package.packagedata.each do |name, data|
           unless data[:files].empty?
             if first
-              info += "#{name}\n"
+              puts name
               first = false
             else
-              info += "%29s#{name}\n" % " "
+              puts "%30s" % [name]
             end
           end
         end
-
-        puts info
       end
     end
   end
