@@ -1,5 +1,8 @@
 require 'spec_helper'
 
+MCollective::PluginManager.clear
+require File.dirname(__FILE__) + '/../../../../../plugins/mcollective/pluginpackager/ospackage.rb'
+
 module MCollective
   module PluginPackager
     describe Ospackage do

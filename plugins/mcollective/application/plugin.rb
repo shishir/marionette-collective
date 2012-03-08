@@ -57,6 +57,7 @@ package : Create all available plugin packages.
 
       configuration[:format] = "ospackage" unless configuration[:format]
 
+      PluginPackager.load_packagers
       plugin_class = PluginPackager[configuration[:plugintype]]
       packager = PluginPackager[configuration[:format]]
 
