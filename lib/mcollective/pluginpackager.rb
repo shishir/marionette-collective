@@ -3,8 +3,15 @@ module MCollective
     # Plugin definition classes
     autoload :Agent, "mcollective/pluginpackager/agent"
 
-    # Package implementation classes
-    autoload :Ospackage, "mcollective/pluginpackager/packagers/ospackage"
+    # Package implementation plugins
+    Config.instance.libdir.each do |libdir|
+      packagedir = "#{libdir}mcollective/pluginpackager"
+      Dir.new(packagedir).grep(/\.rb$/).each do |packager|
+        packagername = File.basename(packager, ".rb")
+        classname = "MCollective::PluginPackager::#{packagername.capitalize}"
+        PluginManager.loadclass(classname) unless PluginManager.include?("#{packagername.capitalize}")
+      end
+    end
 
     def self.[](klass)
       const_get(klass.capitalize)

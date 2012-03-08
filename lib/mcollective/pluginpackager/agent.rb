@@ -77,7 +77,7 @@ module MCollective
         ddl.instance_eval File.read(Dir.glob("#{@path}/agent/*.ddl").first)
         ddl.meta
       rescue
-        abort "error: could not read agent DDL File"
+        raise "error: could not read agent DDL File"
       end
 
       # Check if expected directory is present and not empty.

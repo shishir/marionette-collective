@@ -13,28 +13,28 @@ module MCollective
       # Create packager object with package parameter containing list of files,
       # dependencies and package metadata
       def initialize(package)
-        osfamily = Facter.value("osfamily")
 
-        abort "Missing osfamily fact. Newer version of facter needed" unless osfamily
-
-        if osfamily.downcase == "redhat"
+        if File.exists?("/etc/redhat-release")
           @libdir = "usr/libexec/mcollective/mcollective/"
           @package_type = "rpm"
-          abort "error: pakcage rpm-build is not installed." unless rpmbuild?
-        elsif osfamily.downcase == "debian"
+          raise "error: package 'rpm-build' is not installed." unless build_tool?("rpmbuild")
+        elsif File.exists?("/etc/debian_version")
           @libdir = "usr/share/mcollective/plugins/mcollective"
           @package_type = "deb"
+          raise "error: package 'ar' is not installed." unless build_tool?("ar")
+        else
+          raise "error: cannot identify operating system."
         end
 
         @package = package
       end
 
       # Checks if rpmbuild executable is present.
-      def rpmbuild?
+      def build_tool?(build_tool)
         ENV["PATH"].split(File::PATH_SEPARATOR).each do |path|
-          rpmbuild = File.join(path, "rpmbuild")
+          builder = File.join(path, build_tool)
 
-          if File.exist?(rpmbuild)
+          if File.exists?(builder)
             return true
           end
         end
@@ -102,35 +102,34 @@ module MCollective
 
       # Remove temp directories created during packaging.
       def cleanup_tmpdirs
-        FileUtils.rm_r @tmpdir
+        FileUtils.rm_r @tmpdir if @tmpdir
       end
 
+      # Displays the package metadata and detected files
       def package_information
-        print %Q[
-        Plugin information : #{@package.metadata[:name]}
-        ------------------------------------------------
-               Plugin Type : #{@package.class.to_s.gsub(/^.*::/, "")}
-     Package Output Format : #{@package_type.upcase}
-                   Version : #{@package.metadata[:version]}
-                 Iteration : #{@package.iteration}
-                    Vendor : #{@package.vendor}
-       Post Install Script : #{@package.postinstall}
-                    Author : #{@package.metadata[:author]}
-                   License : #{@package.metadata[:license]}
-                       URL : #{@package.metadata[:url]}
+        puts
+        puts "%30s%s" % ["Plugin information : ", @package.metadata[:name]]
+        puts "%30s%s" % ["-" * 22, "-" * 22]
+        puts "%30s%s" % ["Plugin Type : ", @package.class.to_s.gsub(/^.*::/, "")]
+        puts "%30s%s" % ["Package Output Format : ", @package_type.upcase]
+        puts "%30s%s" % ["Version : ", @package.metadata[:version]]
+        puts "%30s%s" % ["Iteration : ", @package.iteration]
+        puts "%30s%s" % ["Vendor : ", @package.vendor]
+        puts "%30s%s" % ["Post Install Script : ", @package.postinstall]
+        puts "%30s%s" % ["Author : ", @package.metadata[:author]]
+        puts "%30s%s" % ["License : ", @package.metadata[:license]]
+        puts "%30s%s" % ["URL : ", @package.metadata[:url]]
 
-       Identified Packages : ]
-
-        first = true
-        @package.packagedata.each do |name, data|
-          unless data[:files].empty?
-            if first
-              puts name
-              first = false
+        if @package.packagedata.size > 0
+          @package.packagedata.each_with_index do |values, i|
+            next if values[1][:files].empty?
+            if i == 0
+              puts "%30s%s" % ["Identified Packages : ", values[0]]
             else
-              puts "%30s" % [name]
+              puts "%30s%s" % [" ", values[0]]
             end
-          end
+        end
+
         end
       end
     end

@@ -1,5 +1,8 @@
 module MCollective
   class Application::Plugin<Application
+
+    exclude_argument_sections "common", "filter", "rpc"
+
     description "MCollective Plugin Application"
     usage <<-END_OF_USAGE
 mco plugin [info|package] [options] <directory>
