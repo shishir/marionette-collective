@@ -1,3 +1,5 @@
+#!/usr/bin/env rspec
+
 require 'spec_helper'
 
 MCollective::PluginManager.clear
@@ -6,7 +8,6 @@ require File.dirname(__FILE__) + '/../../../../../plugins/mcollective/pluginpack
 module MCollective
   module PluginPackager
     describe Ospackage do
-
       before :all do
         class Ospackage
           ENV = {"PATH" => "."}

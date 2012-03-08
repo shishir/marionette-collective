@@ -1,11 +1,11 @@
+#!/usr/bin/env rspec
+
 require 'spec_helper'
 
 module MCollective
   module PluginPackager
     describe Agent do
-
       describe "#identify_packages" do
-
         before do
           Agent.any_instance.expects(:get_metadata).once.returns({:name=>"foo"})
         end
@@ -88,7 +88,6 @@ module MCollective
           File.expects(:join).with(".", "application").returns("clientdir")
           File.expects(:join).with(".", "bin").returns("bindir")
           File.expects(:join).with(".", "agent").returns("agentdir")
-
         end
 
         it "should populate client files if all directories are present" do
